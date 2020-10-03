@@ -14,6 +14,9 @@ let model, hands = null;
 let detectWatchArea_flag = false;
 let detectWatchArea = null;
 
+let detectRingArea_flag = false;
+let detectRingArea = null;
+
 //let info = document.getElementById('info');
 //let container = document.getElementById('container');
 
@@ -137,6 +140,7 @@ async function detectHandPose(src) {
       const annotations = hands[0].annotations;
       console.log(annotations);
       console.log(annotations.middleFinger[3]);
+      console.log(annotations.ringFinger[3]);
       console.log(annotations.palmBase[0]);
       //手首の座標推測
       //中指とpalmの2点を直線で結び、その延長線上に手首
@@ -155,8 +159,29 @@ async function detectHandPose(src) {
       console.log("x3:" + x3 + ", y3:" + y3);
       detectWatchArea_flag = true
       detectWatchArea = {x:x3, y:y3, angle:rotate};
+
+
+      //指輪の座標推測
+      //薬指の根元に近い関節2点を直線で結び、中点に指輪
+      //1.薬指の根元に近い関節2点の距離distanceと角度rotate
+      x1 = annotations.ringFinger[1][0];
+      y1 = annotations.ringFinger[1][1];
+      x2 = annotations.ringFinger[0][0];
+      y2 = annotations.ringFinger[0][1];
+      distance = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+      radian = Math.atan2(y2 - y1, x2 - x1);
+      rotate = Math.atan2(y2 - y1, x2 - x1)* (180 / Math.PI);
+      console.log("ring_distance:" + distance + ", ring_rotate:" + rotate);
+      //2.薬指の根元に近い関節2点を結んだ直線の中点が指輪座標
+      x3 = (x1 + x2) * 0.5;
+      y3 = (y1 + y2) * 0.5;
+      console.log("ring_x:" + x3 + ", ring_y:" + y3);
+      detectRingArea_flag = true
+      detectRingArea = {x:x3, y:y3, angle:rotate};
+
     }else{
       detectWatchArea_flag = false;
+      detectRingArea_flag = false;
     }
 
   }
@@ -199,7 +224,7 @@ function addWebGL() {
   //ここで3Dモデルをロード
   //今回はglTF形式のものを使用
   var model1 = null;//時計
-  var model2 = null;//時計
+  var model2 = null;//指輪
 
   const loader = new THREE.GLTFLoader();
   loader.load('./obj/Hand_watch.glb', 
@@ -224,21 +249,21 @@ function addWebGL() {
     }
   );
   
-  loader.load('./obj/Hand_watch.glb',
+  loader.load('./obj/ring.glb',
     function (gltf) {
       model2 = gltf.scene; // THREE.Group
-      model2.name = "Hand_watch2"
+      model2.name = "ring"
       model2.visible = false;
-      model2.scale.set(1.0, 1.0, 1.0);
-      model2.position.set(0.5, 0.0, 0.0);
-      model2.rotation.x = -1.4;
+      model2.scale.set(0.02, 0.02, 0.02);
+      model2.position.set(0.0, 0.0, 0.0);
+      model2.rotation.x = -1.5;
       model2.rotation.y = 0;
-      model2.rotation.z = 3.3;
+      model2.rotation.z = 3.15;
       scene.add(model2);
     },
     // called while loading is progressing
     function (xhr) {
-      console.log('Hand_watch2: ' + (xhr.loaded / xhr.total * 100 ) + '% loaded');
+      console.log('ring: ' + (xhr.loaded / xhr.total * 100 ) + '% loaded');
     },
     // called when loading has errors
     function (error) {
@@ -332,14 +357,32 @@ function addWebGL() {
         // ToDo:スマホのセンサ情報用いてスマホの傾きに応じて3Dモデルの奥行きの角度調整
         
         model1.visible = true;
-        //model2.visible = true;
       } else if(detectWatchArea_flag == false){
         model1.visible = false;
-        //model2.visible = false;
+      }
+
+      if(detectRingArea_flag == true){
+        //スクリーン座標逆変換
+        let detectRingArea_sx = detectRingArea.x;
+        let detectRingArea_sy = detectRingArea.y;
+        let project_x = (detectRingArea_sx * 2 / width) -1.0 -texture.offset.x;
+        let project_y = -(detectRingArea_sy * 2 / height) +1.0 +texture.offset.y;
+        console.log(project_x);
+        console.log(project_y);
+        model2.position.set(project_x, project_y, 0.0);
+        //手の平の抽出角度に応じて3Dモデル回転
+        console.log(THREE.Math.degToRad(detectRingArea.angle));
+        //model2.rotation.y = THREE.Math.degToRad(detectRingArea.angle);
+        
+        // ToDo:スマホのセンサ情報用いてスマホの傾きに応じて3Dモデルの奥行きの角度調整
+        
+        model2.visible = true;
+      } else if(detectRingArea_flag == false){
+        model2.visible = false;
       }
     
       // スクリーン座標を取得する
-      //const project = model1.position.project(camera);
+      //const project = model2.position.project(camera);
       //const sx = (width / 2) * (+project.x + 1.0);
       //const sy = (height / 2) * (-project.y + 1.0);
       // スクリーン座標
@@ -348,7 +391,7 @@ function addWebGL() {
 
     
       // ワールド座標を取得する
-      //const world = model1.getWorldPosition();
+      //const world = model2.getWorldPosition();
       // ワールド座標
       //console.log(world);
 

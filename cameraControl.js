@@ -324,7 +324,7 @@ function addWebGL() {
         let project_y = -(detectWatchArea_sy * 2 / height) +1.0 +texture.offset.y;
         console.log(project_x);
         console.log(project_y);
-        model1.position.set(project_x, project_y-1.5, 0.0);
+        model1.position.set(project_x, project_y-1.0, 0.0);
         //手の平の抽出角度に応じて3Dモデル回転
         console.log(THREE.Math.degToRad(detectWatchArea.angle));
         //model1.rotation.y = THREE.Math.degToRad(detectWatchArea.angle);

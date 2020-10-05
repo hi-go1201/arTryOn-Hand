@@ -356,7 +356,7 @@ function addWebGL() {
         
         // ToDo:スマホのセンサ情報用いてスマホの傾きに応じて3Dモデルの奥行きの角度調整
         
-        model1.visible = true;
+        //model1.visible = true;
       } else if(detectWatchArea_flag == false){
         model1.visible = false;
       }
@@ -376,7 +376,7 @@ function addWebGL() {
         
         // ToDo:スマホのセンサ情報用いてスマホの傾きに応じて3Dモデルの奥行きの角度調整
         
-        //model2.visible = true;
+        model2.visible = true;
       } else if(detectRingArea_flag == false){
         model2.visible = false;
       }

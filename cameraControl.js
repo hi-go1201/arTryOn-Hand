@@ -443,7 +443,7 @@ function addWebGL() {
         console.log("angle:" + detectRingArea.angle);
 
         var radians = THREE.Math.degToRad(40 + detectRingArea.angle);
-        var axis = new THREE.Vector3(1, 1, 1);
+        var axis = new THREE.Vector3(-1, -1, -1);
         var rotWorldMatrix = new THREE.Matrix4();
         rotWorldMatrix.makeRotationAxis(axis.normalize(), radians);
         rotWorldMatrix.multiply(model2.matrix);

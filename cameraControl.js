@@ -209,7 +209,7 @@ async function detectHandPose(src) {
 
       avg_w = (w_0 + w_1 + w_2 + w_3) / 4;
       //wの増減量が少なそうなので2倍にする
-      fix_w = 2 * avg_w
+      fix_w = 3 * avg_w
       console.log("avg_w:" + avg_w + ", fix_w:" + fix_w);
 
       //手首の座標推測

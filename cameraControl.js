@@ -163,8 +163,8 @@ async function detectHandPose(src) {
       var index_z1 = annotations.indexFinger[1][2];
       var index_z2 = annotations.indexFinger[2][2];
       var index_z3 = annotations.indexFinger[3][2];
-      console.log(index_x0);
-      console.log(index_z0);
+      //console.log(index_x0);
+      //console.log(index_z0);
       //中指
       var middle_x0 = annotations.middleFinger[0][0];
       var middle_x1 = annotations.middleFinger[1][0];
@@ -174,8 +174,8 @@ async function detectHandPose(src) {
       var middle_z1 = annotations.middleFinger[1][2];
       var middle_z2 = annotations.middleFinger[2][2];
       var middle_z3 = annotations.middleFinger[3][2];
-      console.log(middle_x0);
-      console.log(middle_z0);
+      //console.log(middle_x0);
+      //console.log(middle_z0);
       //薬指
       var ring_x0 = annotations.ringFinger[0][0];
       var ring_x1 = annotations.ringFinger[1][0];
@@ -185,8 +185,8 @@ async function detectHandPose(src) {
       var ring_z1 = annotations.ringFinger[1][2];
       var ring_z2 = annotations.ringFinger[2][2];
       var ring_z3 = annotations.ringFinger[3][2];
-      console.log(ring_x0);
-      console.log(ring_z0);
+      //console.log(ring_x0);
+      //console.log(ring_z0);
       //小指
       //var pinky_z0 = annotations.pinky[0][2];
       //var pinky_z1 = annotations.pinky[1][2];
@@ -196,21 +196,21 @@ async function detectHandPose(src) {
       //3本指から角度w算出
       var rad_0 = Math.atan2(index_z0 - ring_z0, index_x0 - ring_x0);
       var w_0 = Math.atan2(index_z0 - ring_z0, index_x0 - ring_x0)* (180 / Math.PI);
-      console.log("w0:" + w_0);
+      //console.log("w0:" + w_0);
       var rad_1 = Math.atan2(index_z1 - ring_z1, index_x1 - ring_x1);
       var w_1 = Math.atan2(index_z1 - ring_z1, index_x1 - ring_x1)* (180 / Math.PI);
-      console.log("w1:" + w_1);
+      //console.log("w1:" + w_1);
       var rad_2 = Math.atan2(index_z2 - ring_z2, index_x2 - ring_x2);
       var w_2 = Math.atan2(index_z2 - ring_z2, index_x2 - ring_x2)* (180 / Math.PI);
-      console.log("w2:" + w_2);
+      //console.log("w2:" + w_2);
       var rad_3 = Math.atan2(index_z3 - ring_z3, index_x3 - ring_x3);
       var w_3 = Math.atan2(index_z3 - ring_z3, index_x3 - ring_x3)* (180 / Math.PI);
-      console.log("w3:" + w_3);
+      //console.log("w3:" + w_3);
 
       avg_w = (w_0 + w_1 + w_2 + w_3) / 4;
-      //wの増減量が少なそうなので2倍にする
+      //wの増減量が少なそうなのでX倍にする
       fix_w = 3 * avg_w
-      console.log("avg_w:" + avg_w + ", fix_w:" + fix_w);
+      //console.log("avg_w:" + avg_w + ", fix_w:" + fix_w);
 
       //手首の座標推測
       //中指とpalmの2点を直線で結び、その延長線上に手首
@@ -226,7 +226,7 @@ async function detectHandPose(src) {
       //2.distanceを一定間隔伸ばし、その先の手首座標
       var x3 = x1 + (distance+100) * Math.cos(radian);
       var y3 = y1 + (distance+100) * Math.sin(radian);
-      console.log("x3:" + x3 + ", y3:" + y3);
+      //console.log("x3:" + x3 + ", y3:" + y3);
       detectWatchArea_flag = true
       detectWatchArea = {x:x3, y:y3, angle:rotate};
 
@@ -245,7 +245,7 @@ async function detectHandPose(src) {
       //2.薬指の根元に近い関節2点を結んだ直線の中点が指輪座標
       x3 = (x1 + x2) * 0.5;
       y3 = (y1 + y2) * 0.5;
-      console.log("ring_x:" + x3 + ", ring_y:" + y3);
+      //console.log("ring_x:" + x3 + ", ring_y:" + y3);
       detectRingArea_flag = true
       detectRingArea = {x:x3, y:y3, angle:rotate, w:fix_w};
 
@@ -439,13 +439,23 @@ function addWebGL() {
         let project_y = -(detectRingArea_sy * 2 / height) +1.0 +texture.offset.y;
         //console.log(project_x);
         //console.log(project_y);
+
+        console.log("angle:" + detectRingArea.angle);
+
+        var radians = THREE.Math.degToRad(40 + detectRingArea.angle);
+        var axis = new THREE.Vector3(-1, -1, -1);
+        var rotWorldMatrix = new THREE.Matrix4();
+        rotWorldMatrix.makeRotationAxis(axis.normalize(), radians);
+        rotWorldMatrix.multiply(model2.matrix);
+        model2.matrix = rotWorldMatrix;
+        model2.quaternion.setFromAxisAngle(axis, radians);
+
+        //console.log(THREE.Math.degToRad(detectRingArea.w));
+        model2.rotation.z = THREE.Math.degToRad(detectRingArea.w / 3);
         model2.position.set(project_x, project_y, 0.0);
         //手の平の抽出角度に応じて3Dモデル回転
         //console.log(THREE.Math.degToRad(detectRingArea.angle));
         //model2.rotation.y = THREE.Math.degToRad(detectRingArea.angle);
-        
-        console.log(THREE.Math.degToRad(detectRingArea.w));
-        model2.rotation.z = 3.15 + THREE.Math.degToRad(detectRingArea.w);
 
         // ToDo:スマホのセンサ情報用いてスマホの傾きに応じて3Dモデルの奥行きの角度調整
         

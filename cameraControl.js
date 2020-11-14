@@ -16,6 +16,8 @@ let detectWatchArea = null;
 
 let detectRingArea_flag = false;
 let detectRingArea = null;
+let detectIndexArea = null;
+let detectPinkyArea = null;
 
 //let info = document.getElementById('info');
 //let container = document.getElementById('container');
@@ -141,7 +143,7 @@ async function detectHandPose(src) {
     if(hands.length > 0) {
       const landmarks = hands[0].landmarks;
       const annotations = hands[0].annotations;
-      console.log(annotations);
+      //console.log(annotations);
       //console.log(annotations.middleFinger[3]);
       //console.log(annotations.ringFinger[3]);
       //console.log(annotations.palmBase[0]);
@@ -209,7 +211,7 @@ async function detectHandPose(src) {
 
       avg_w = (w_0 + w_1 + w_2 + w_3) / 4;
       //wの増減量が少なそうなのでX倍にする
-      fix_w = 3 * avg_w
+      fix_w = 1 * avg_w
       //console.log("avg_w:" + avg_w + ", fix_w:" + fix_w);
 
       //手首の座標推測
@@ -228,7 +230,7 @@ async function detectHandPose(src) {
       var y3 = y1 + (distance+100) * Math.sin(radian);
       //console.log("x3:" + x3 + ", y3:" + y3);
       detectWatchArea_flag = true
-      detectWatchArea = {x:x3, y:y3, angle:rotate};
+      detectWatchArea = {x:x3, y:y3, angle:rotate, w:fix_w};
 
 
       //指輪の座標推測
@@ -248,6 +250,36 @@ async function detectHandPose(src) {
       //console.log("ring_x:" + x3 + ", ring_y:" + y3);
       detectRingArea_flag = true
       detectRingArea = {x:x3, y:y3, angle:rotate, w:fix_w};
+
+      //オクルージョン用に人差し指と小指の座標も推測しておく
+      //人差し指
+      x1 = annotations.indexFinger[1][0];
+      y1 = annotations.indexFinger[1][1];
+      x2 = annotations.indexFinger[0][0];
+      y2 = annotations.indexFinger[0][1];
+      distance = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+      radian = Math.atan2(y2 - y1, x2 - x1);
+      rotate = Math.atan2(y2 - y1, x2 - x1)* (180 / Math.PI);
+      //console.log("ring_distance:" + distance + ", ring_rotate:" + rotate);
+      //2.人差し指の根元に近い関節2点を結んだ直線の中点が指輪と重なる人差し指座標
+      x3 = (x1 + x2) * 0.5;
+      y3 = (y1 + y2) * 0.5;
+      //console.log("ring_x:" + x3 + ", ring_y:" + y3);
+      detectIndexArea = {x:x3, y:y3, angle:rotate, w:fix_w};
+      //小指
+      x1 = annotations.pinky[1][0];
+      y1 = annotations.pinky[1][1];
+      x2 = annotations.pinky[0][0];
+      y2 = annotations.pinky[0][1];
+      distance = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+      radian = Math.atan2(y2 - y1, x2 - x1);
+      rotate = Math.atan2(y2 - y1, x2 - x1)* (180 / Math.PI);
+      //console.log("ring_distance:" + distance + ", ring_rotate:" + rotate);
+      //2.小指の根元に近い関節2点を結んだ直線の中点が指輪と重なる小指座標
+      x3 = (x1 + x2) * 0.5;
+      y3 = (y1 + y2) * 0.5;
+      //console.log("ring_x:" + x3 + ", ring_y:" + y3);
+      detectPinkyArea = {x:x3, y:y3, angle:rotate, w:fix_w};
 
     }else{
       detectWatchArea_flag = false;
@@ -304,9 +336,9 @@ function addWebGL() {
       model1.visible = false;
       model1.scale.set(2.0, 2.0, 2.0);
       model1.position.set(0.0, 0.0, 0.0);
-      model1.rotation.x = 0.0;
-      model1.rotation.y = -1.5;
-      model1.rotation.z = 0.0;
+      //model1.rotation.x = 0.0;
+      //model1.rotation.y = -1.5;
+      //model1.rotation.z = 0.0;
       scene.add(model1);
     },
     // called while loading is progressing
@@ -326,9 +358,9 @@ function addWebGL() {
       model2.visible = false;
       model2.scale.set(0.02, 0.02, 0.02);
       model2.position.set(0.0, 0.0, 0.0);
-      model2.rotation.x = -1.5;
-      model2.rotation.y = 0;
-      model2.rotation.z = 3.15;
+      //model2.rotation.x = -1.5;
+      //model2.rotation.y = 0;
+      //model2.rotation.z = 3.15;
       scene.add(model2);
     },
     // called while loading is progressing
@@ -340,6 +372,32 @@ function addWebGL() {
       console.log('An error happened');
     }
   );
+  //指輪オクルージョン用の円柱追加 colorWrite=falseで色情報無くして深度情報のみ描画できる
+  var cylinder = new THREE.Mesh(                                     
+    new THREE.CylinderGeometry(0.151,0.151,0.2,50),                         
+    new THREE.MeshPhongMaterial({color: 0xFF0000, opacity: 1.0, transparent: false, colorWrite: false})
+  );
+  cylinder.position.set(0, 0, 0); //(x,y,z)
+  //sceneオブジェクトに追加
+  scene.add(cylinder); 
+
+  //指輪オクルージョン 人差し指用円柱追加
+  var index_cylinder = new THREE.Mesh(                                     
+    new THREE.CylinderGeometry(0.151,0.151,0.5,50),                         
+    new THREE.MeshPhongMaterial({color: 0xFF00FF, opacity: 1.0, transparent: false, colorWrite: false})
+  );
+  index_cylinder.position.set(-0.1, 0, 0); //(x,y,z)
+  //sceneオブジェクトに追加
+  scene.add(index_cylinder);
+
+  //指輪オクルージョン 小指用円柱追加
+  var pinky_cylinder = new THREE.Mesh(                                     
+    new THREE.CylinderGeometry(0.151,0.151,0.5,50),                         
+    new THREE.MeshPhongMaterial({color: 0xFFFF00, opacity: 1.0, transparent: false, colorWrite: false})
+  );
+  pinky_cylinder.position.set(0.1, 0, 0); //(x,y,z)
+  //sceneオブジェクトに追加
+  scene.add(pinky_cylinder);
 
   // renderer
   var renderer = new THREE.WebGLRenderer({
@@ -419,7 +477,27 @@ function addWebGL() {
         let project_y = -(detectWatchArea_sy * 2 / height) +1.0 +texture.offset.y;
         //console.log(project_x);
         //console.log(project_y);
-        model1.position.set(project_x, project_y-1.0, 0.0);
+
+        //console.log("angle:" + detectWatchArea.angle);
+
+        var radians = THREE.Math.degToRad(40 + detectWatchArea.angle);
+        var axis = new THREE.Vector3(-1, -1, -1);
+        var rotWorldMatrix = new THREE.Matrix4();
+        rotWorldMatrix.makeRotationAxis(axis.normalize(), radians);
+        rotWorldMatrix.multiply(model1.matrix);
+        model1.matrix = rotWorldMatrix;
+        model1.quaternion.setFromAxisAngle(axis, radians);
+
+        //console.log(THREE.Math.degToRad(detectRingArea.w));
+        model1.rotation.x += 0.1;
+        model1.rotation.y += 0.1;
+        model1.rotation.z = THREE.Math.degToRad(detectWatchArea.w);
+        
+        //console.log("rot_x:" + model1.rotation.x);
+        //console.log("rot_y:" + model1.rotation.y);
+        //console.log("rot_z:" + model1.rotation.z);
+        
+        model1.position.set(project_x, project_y, 0.0);
         //手の平の抽出角度に応じて3Dモデル回転
         //console.log(THREE.Math.degToRad(detectWatchArea.angle));
         //model1.rotation.y = THREE.Math.degToRad(detectWatchArea.angle);
@@ -432,15 +510,19 @@ function addWebGL() {
       }
 
       if(detectRingArea_flag == true){
-        //スクリーン座標逆変換
-        let detectRingArea_sx = detectRingArea.x;
-        let detectRingArea_sy = detectRingArea.y;
+        //スクリーン座標逆変換 285,235
+        console.log("canvas_size:" + window.innerWidth+ "," + window.innerHeight);
+        console.log("img_size:" + texture.image.width+ "," + texture.image.height);
+        console.log("finger_pos:[", + detectRingArea.x + "," + detectRingArea.y + "]");
+        let detectRingArea_sx = detectRingArea.x + 10;
+        let detectRingArea_sy = detectRingArea.y + 80;
         let project_x = (detectRingArea_sx * 2 / width) -1.0 -texture.offset.x;
         let project_y = -(detectRingArea_sy * 2 / height) +1.0 +texture.offset.y;
+        console.log("display_pos:[", + project_x + "," + project_y + "]");
         //console.log(project_x);
         //console.log(project_y);
 
-        console.log("angle:" + detectRingArea.angle);
+        //console.log("angle:" + detectRingArea.angle);
 
         var radians = THREE.Math.degToRad(40 + detectRingArea.angle);
         var axis = new THREE.Vector3(-1, -1, -1);
@@ -451,11 +533,48 @@ function addWebGL() {
         model2.quaternion.setFromAxisAngle(axis, radians);
 
         //console.log(THREE.Math.degToRad(detectRingArea.w));
-        model2.rotation.z = THREE.Math.degToRad(detectRingArea.w / 3);
+        model2.rotation.x += 0.2;
+        model2.rotation.z = -0.2 + THREE.Math.degToRad(detectRingArea.w);
         model2.position.set(project_x, project_y, 0.0);
         //手の平の抽出角度に応じて3Dモデル回転
         //console.log(THREE.Math.degToRad(detectRingArea.angle));
         //model2.rotation.y = THREE.Math.degToRad(detectRingArea.angle);
+
+        //指輪の位置変更に合わせてオクルージョン用の円柱も位置変更
+        cylinder.quaternion.setFromAxisAngle(axis, radians);
+        cylinder.position.set(project_x, project_y, 0.0);
+
+        //指輪オクルージョン用に人差し指
+        detectRingArea_sx = detectIndexArea.x - 30;
+        detectRingArea_sy = detectIndexArea.y + 80;
+        project_x = (detectRingArea_sx * 2 / width) -1.0 -texture.offset.x;
+        project_y = -(detectRingArea_sy * 2 / height) +1.0 +texture.offset.y;
+        radians = THREE.Math.degToRad(40 + detectIndexArea.angle);
+        axis = new THREE.Vector3(-1, -1, -1);
+        rotWorldMatrix = new THREE.Matrix4();
+        rotWorldMatrix.makeRotationAxis(axis.normalize(), radians);
+        rotWorldMatrix.multiply(index_cylinder.matrix);
+        index_cylinder.matrix = rotWorldMatrix;
+        index_cylinder.quaternion.setFromAxisAngle(axis, radians);
+        //index_cylinder.rotation.x += 0.2;
+        //index_cylinder.rotation.z = -0.2 + THREE.Math.degToRad(detectIndexArea.w);
+        index_cylinder.position.set(project_x, project_y, 0.0);
+
+        //指輪オクルージョン用に小指
+        detectRingArea_sx = detectPinkyArea.x + 40;
+        detectRingArea_sy = detectPinkyArea.y + 80;
+        project_x = (detectRingArea_sx * 2 / width) -1.0 -texture.offset.x;
+        project_y = -(detectRingArea_sy * 2 / height) +1.0 +texture.offset.y;
+        radians = THREE.Math.degToRad(40 + detectPinkyArea.angle);
+        axis = new THREE.Vector3(-1, -1, -1);
+        rotWorldMatrix = new THREE.Matrix4();
+        rotWorldMatrix.makeRotationAxis(axis.normalize(), radians);
+        rotWorldMatrix.multiply(pinky_cylinder.matrix);
+        pinky_cylinder.matrix = rotWorldMatrix;
+        pinky_cylinder.quaternion.setFromAxisAngle(axis, radians);
+        //pinky_cylinder.rotation.x += 0.2;
+        //pinky_cylinder.rotation.z = -0.2 + THREE.Math.degToRad(detectPinkyArea.w);
+        pinky_cylinder.position.set(project_x, project_y, 0.0);
 
         // ToDo:スマホのセンサ情報用いてスマホの傾きに応じて3Dモデルの奥行きの角度調整
         

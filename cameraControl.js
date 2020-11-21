@@ -580,7 +580,7 @@ function addWebGL() {
         // ToDo:スマホのセンサ情報用いてスマホの傾きに応じて3Dモデルの奥行きの角度調整
         // 指の検出領域(各関節点の直線の長さ)に合わせて３Dモデルの拡大縮小
         // 各関節点の直線の長さ = 90でringのscale:0.02
-        var model_scaling = detectRingArea.scale / 94;
+        var model_scaling = detectRingArea.scale / 90;
         console.log("model scaling:" + model_scaling);
         model2.scale.set(0.02 * model_scaling, 0.02 * model_scaling, 0.02 * model_scaling);
         cylinder.scale.set(model_scaling, model_scaling, model_scaling);                      

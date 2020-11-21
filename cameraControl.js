@@ -583,6 +583,7 @@ function addWebGL() {
         var model_scaling = detectRingArea.scale / 90;
         console.log("model scaling:" + model_scaling);
         model2.scale.set(0.02 * model_scaling, 0.02 * model_scaling, 0.02 * model_scaling);
+        console.log("model2 scale:" + model2.scale.x);
         cylinder.scale.set(model_scaling, model_scaling, model_scaling);                      
         index_cylinder.scale.set(model_scaling, model_scaling, model_scaling);                      
         pinky_cylinder.scale.set(model_scaling, model_scaling, model_scaling);

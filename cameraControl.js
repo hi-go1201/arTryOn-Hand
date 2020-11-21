@@ -249,7 +249,7 @@ async function detectHandPose(src) {
       y3 = (y1 + y2) * 0.5;
       //console.log("ring_x:" + x3 + ", ring_y:" + y3);
       detectRingArea_flag = true
-      detectRingArea = {x:x3, y:y3, angle:rotate, w:fix_w};
+      detectRingArea = {x:x3, y:y3, angle:rotate, w:fix_w, scale:distance};
 
       //オクルージョン用に人差し指と小指の座標も推測しておく
       //人差し指
@@ -373,8 +373,8 @@ function addWebGL() {
     }
   );
   //指輪オクルージョン用の円柱追加 colorWrite=falseで色情報無くして深度情報のみ描画できる
-  var cylinder = new THREE.Mesh(                                     
-    new THREE.CylinderGeometry(0.151,0.151,0.2,50),                         
+  var cylinder = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.151,0.151,0.2,50),
     new THREE.MeshPhongMaterial({color: 0xFF0000, opacity: 1.0, transparent: false, colorWrite: false})
   );
   cylinder.position.set(0, 0, 0); //(x,y,z)
@@ -382,8 +382,8 @@ function addWebGL() {
   scene.add(cylinder); 
 
   //指輪オクルージョン 人差し指用円柱追加
-  var index_cylinder = new THREE.Mesh(                                     
-    new THREE.CylinderGeometry(0.151,0.151,0.5,50),                         
+  var index_cylinder = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.151,0.151,0.5,50),
     new THREE.MeshPhongMaterial({color: 0xFF00FF, opacity: 1.0, transparent: false, colorWrite: false})
   );
   index_cylinder.position.set(-0.1, 0, 0); //(x,y,z)
@@ -391,8 +391,8 @@ function addWebGL() {
   scene.add(index_cylinder);
 
   //指輪オクルージョン 小指用円柱追加
-  var pinky_cylinder = new THREE.Mesh(                                     
-    new THREE.CylinderGeometry(0.151,0.151,0.5,50),                         
+  var pinky_cylinder = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.151,0.151,0.5,50),            
     new THREE.MeshPhongMaterial({color: 0xFFFF00, opacity: 1.0, transparent: false, colorWrite: false})
   );
   pinky_cylinder.position.set(0.1, 0, 0); //(x,y,z)
@@ -511,18 +511,19 @@ function addWebGL() {
 
       if(detectRingArea_flag == true){
         //スクリーン座標逆変換 285,235
-        console.log("canvas_size:" + window.innerWidth+ "," + window.innerHeight);
-        console.log("img_size:" + texture.image.width+ "," + texture.image.height);
-        console.log("finger_pos:[", + detectRingArea.x + "," + detectRingArea.y + "]");
+        //console.log("canvas_size:" + window.innerWidth+ "," + window.innerHeight);
+        //console.log("img_size:" + texture.image.width+ "," + texture.image.height);
+        //console.log("finger_pos:[", + detectRingArea.x + "," + detectRingArea.y + "]");
         let detectRingArea_sx = detectRingArea.x + 10;
         let detectRingArea_sy = detectRingArea.y + 80;
         let project_x = (detectRingArea_sx * 2 / width) -1.0 -texture.offset.x;
         let project_y = -(detectRingArea_sy * 2 / height) +1.0 +texture.offset.y;
-        console.log("display_pos:[", + project_x + "," + project_y + "]");
+        //console.log("display_pos:[", + project_x + "," + project_y + "]");
         //console.log(project_x);
         //console.log(project_y);
-
         //console.log("angle:" + detectRingArea.angle);
+
+        console.log("scale:" + detectRingArea.scale);
 
         var radians = THREE.Math.degToRad(40 + detectRingArea.angle);
         var axis = new THREE.Vector3(-1, -1, -1);
@@ -577,7 +578,14 @@ function addWebGL() {
         pinky_cylinder.position.set(project_x, project_y, 0.0);
 
         // ToDo:スマホのセンサ情報用いてスマホの傾きに応じて3Dモデルの奥行きの角度調整
-        
+        // 指の検出領域(各関節点の直線の長さ)に合わせて３Dモデルの拡大縮小
+        // 各関節点の直線の長さ = 90でringのscale:0.02
+        var model_scaling = detectRingArea.scale / 94;
+        console.log("model scaling:" + model_scaling);
+        model2.scale.set(0.02 * model_scaling, 0.02 * model_scaling, 0.02 * model_scaling);
+        cylinder.scale.set(model_scaling, model_scaling, model_scaling);                      
+        index_cylinder.scale.set(model_scaling, model_scaling, model_scaling);                      
+        pinky_cylinder.scale.set(model_scaling, model_scaling, model_scaling);
         model2.visible = true;
       } else if(detectRingArea_flag == false){
         model2.visible = false;

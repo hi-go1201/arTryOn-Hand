@@ -473,7 +473,7 @@ function addWebGL() {
         cylinder.scale.set(scaling, scaling, scaling);
 
         // 1.指の座標を3D空間座標に変換
-        //console.log("finger_pos:[", + model_info.x + "," + model_info.y + "]");
+        console.log("finger_pos:[", + model_info.x + "," + model_info.y + "]");
         var finger3Dx =  (model_info.x * 2 / width) - 1.0 - texture.offset.x;
         var finger3Dy = -(model_info.y * 2 / height) + 1.0 + texture.offset.y;
         //console.log("finger3Dpos:[", + finger3Dx + "," + finger3Dy + "]"); 
@@ -544,7 +544,7 @@ function addWebGL() {
     const width = window.innerWidth; // rendererのサイズ
     const height = window.innerHeight;
     // 1.指の座標を3D空間座標に変換
-    console.log("finger_pos:[", + model_info.x + "," + model_info.y + "]");
+    //console.log("finger_pos:[", + model_info.x + "," + model_info.y + "]");
 
     // 4.指の検出領域(各関節点の直線の長さ)に合わせて３Dモデルの拡大縮小
     // 各関節点の直線の長さ = 93.396でringのscale:0.01

@@ -326,7 +326,7 @@ function addWebGL() {
   //指輪オクルージョン用の円柱追加 colorWrite=falseで色情報無くして深度情報のみ描画できる
   var ring_cylinder = new THREE.Mesh(
     new THREE.CylinderGeometry(0.08,0.08,0.08,50),
-    new THREE.MeshPhongMaterial({color: 0xFF0000, opacity: 1.0, transparent: false, colorWrite: true})
+    new THREE.MeshPhongMaterial({color: 0xFF0000, opacity: 1.0, transparent: false, colorWrite: false})
   );
   ring_cylinder.position.set(0, 0, 0); //(x,y,z)
   //sceneオブジェクトに追加
@@ -335,7 +335,7 @@ function addWebGL() {
   //指輪オクルージョン 中指用円柱追加
   var middle_cylinder = new THREE.Mesh(
     new THREE.CylinderGeometry(0.07,0.07,0.3,50),
-    new THREE.MeshPhongMaterial({color: 0xFF00FF, opacity: 1.0, transparent: false, colorWrite: true})
+    new THREE.MeshPhongMaterial({color: 0xFF00FF, opacity: 1.0, transparent: false, colorWrite: false})
   );
   middle_cylinder.position.set(-0.1, 0, 0); //(x,y,z)
   //sceneオブジェクトに追加
@@ -344,7 +344,7 @@ function addWebGL() {
   //指輪オクルージョン 小指用円柱追加
   var pinky_cylinder = new THREE.Mesh(
     new THREE.CylinderGeometry(0.08,0.08,0.5,50),
-    new THREE.MeshPhongMaterial({color: 0xFFFF00, opacity: 1.0, transparent: false, colorWrite: true})
+    new THREE.MeshPhongMaterial({color: 0xFFFF00, opacity: 1.0, transparent: false, colorWrite: false})
   );
   pinky_cylinder.position.set(0.1, 0, 0); //(x,y,z)
   //sceneオブジェクトに追加
@@ -500,7 +500,7 @@ function addWebGL() {
         console.log("finger3Dpos:[", + finger3Dx*0.5 + "," + finger3Dy + "]"); 
         
         // 2.指輪を指の検出座標に移動
-        model.position.set(finger3Dx*0.5, finger3Dy, -0.02);
+        model.position.set(finger3Dx*0.5, finger3Dy, 0.0);
         //console.log("angle:" + model_info.angle);
         //console.log("distance:" + model_info.distance);
 
@@ -548,7 +548,7 @@ function addWebGL() {
 
         // 6.指輪の位置変更に合わせてオクルージョン用の円柱も位置変更
         //パラメータ：90:0, 180:1.55→155/90 = 1.72
-        cylinder.position.set(finger3Dx*0.5, finger3Dy, -0.02);
+        cylinder.position.set(finger3Dx*0.5, finger3Dy, 0.0);
         cylinder.rotation.set(0,0,(90-model_info.angle)*0.0172);
         //console.log(cylinder.rotation.z);
 
@@ -577,7 +577,7 @@ function addWebGL() {
     //console.log("finger3Dpos:[", + finger3Dx + "," + finger3Dy + "]"); 
         
     // 2.円柱を指の検出座標に移動
-    cylinder.position.set(finger3Dx*0.5, finger3Dy, 0.02);
+    cylinder.position.set(finger3Dx*0.5, finger3Dy, 0.0);
     //console.log("angle:" + model_info.angle);
     //console.log("distance:" + model_info.distance);
 

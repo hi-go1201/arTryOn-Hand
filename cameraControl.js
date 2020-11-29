@@ -82,9 +82,10 @@ async function processVideo() {
   var  x2 = parseInt((video.videoWidth / 2) + (window.innerWidth / 2));
   var  y1 = parseInt((video.videoHeight / 2) - (window.innerHeight / 2));
   var  y2 = parseInt((video.videoHeight / 2) + (window.innerHeight / 2));
+  console.log("x1:"+x1+",y1:"+y1+",x2:"+x2+",y2:"+y2);
+
   let rect = new cv.Rect(x1, y1, window.innerWidth, window.innerHeight);
   dst = src.roi(rect);
-  console.log("x1:"+x1+",y1:"+y1+",x2:"+x2+",y2:"+y2);
   
   cv.imshow('canvas', dst);
   dst.delete();

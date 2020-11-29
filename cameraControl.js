@@ -48,7 +48,7 @@ function startCamera() {
     if (!streaming) {
       console.log("video_size:" + video.videoWidth+ "," + video.videoHeight);
       width = video.videoWidth;
-      height = video.videoWidth;
+      height = video.videoHeight;
       video.setAttribute("width", width);
       video.setAttribute("height", height);
       streaming = true;
@@ -60,7 +60,7 @@ function startCamera() {
 
 function startVideoProcessing() {
   if (!streaming) { console.warn("Please startup your webcam"); return; }
-  src = new cv.Mat(video.videoWidth, video.videoWidth, cv.CV_8UC4);
+  src = new cv.Mat(video.videoWidth, video.videoHeight, cv.CV_8UC4);
   requestAnimationFrame(processVideo);
   addWebGL();
 }

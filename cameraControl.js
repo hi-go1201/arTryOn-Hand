@@ -535,7 +535,7 @@ function addWebGL() {
         }
         //front時はrearにさせない
         if(model.view == 'front'){
-          if(Math.abs(model_info.w) >= 120 && Math.abs(model_info.w) <= 180){
+          if(Math.abs(model_info.w) >= 90 && Math.abs(model_info.w) <= 180){
             model.rotation.z = THREE.Math.degToRad(model_info.w);
           }else{
             model.rotation.z = 3.15;

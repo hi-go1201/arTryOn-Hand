@@ -60,7 +60,7 @@ function startCamera() {
 
 function startVideoProcessing() {
   if (!streaming) { console.warn("Please startup your webcam"); return; }
-  src = new cv.Mat(video.videoWidth, video.videoHeight, cv.CV_8UC4);
+  src = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
   requestAnimationFrame(processVideo);
   addWebGL();
 }
@@ -111,15 +111,15 @@ async function detectHandPose() {
  
     // Pass in a video stream to the model to obtain 
     // a prediction from the MediaPipe graph.
-    hands = await handmodel.estimateHands(document.querySelector("#canvas"));
+    hands = await handmodel.estimateHands(document.getElementById("canvas"));
     handpose_init = true;
 
-    console.log("canvasInfo:" + document.querySelector("#canvas").width + "," + document.querySelector("#canvas").height);
+    console.log("canvasInfo:" + document.getElementById("canvas").width + "," + document.getElementById("canvas").height);
 
   }else{
     // Pass in a video stream to the model to obtain 
     // a prediction from the MediaPipe graph.
-    hands = await handmodel.estimateHands(document.querySelector("#canvas"));
+    hands = await handmodel.estimateHands(document.getElementById("canvas"));
  
     // Each hand object contains a `landmarks` property,
     // which is an array of 21 3-D landmarks.

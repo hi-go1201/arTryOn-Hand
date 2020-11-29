@@ -30,10 +30,8 @@ function startCamera() {
   navigator.mediaDevices.getUserMedia({
     video: {
       facingMode: "environment",
-      width: window.innerWidth,
-      height: window.innerHeight,
-      //width: { min: 800, ideal: 1280, max: 1920 },
-      //height: { min: 600, ideal:  720, max: 1080 }
+      width: { min: 800, ideal: 1280, max: 1920 },
+      height: { min: 600, ideal:  720, max: 1080 }
     },
     audio: false
   })
@@ -49,8 +47,8 @@ function startCamera() {
   video.addEventListener("canplay", function(ev){
     if (!streaming) {
       console.log("video_size:" + video.videoWidth+ "," + video.videoHeight);
-      height = video.videoHeight;
       width = video.videoWidth;
+      height = video.videoWidth;
       video.setAttribute("width", width);
       video.setAttribute("height", height);
       streaming = true;
@@ -62,7 +60,7 @@ function startCamera() {
 
 function startVideoProcessing() {
   if (!streaming) { console.warn("Please startup your webcam"); return; }
-  src = new cv.Mat(height, width, cv.CV_8UC4);
+  src = new cv.Mat(video.videoWidth, video.videoWidth, cv.CV_8UC4);
   requestAnimationFrame(processVideo);
   addWebGL();
 }
@@ -70,8 +68,26 @@ function startVideoProcessing() {
 async function processVideo() {
   //stats.begin();
   vc.read(src);
+  //スマホ用にvideoソースの解像度修正
+  let dst = new cv.Mat();
+  let dsize = new cv.Size(window.innerWidth, window.innerHeight);
+  var aspect = window.innerWidth / window.innerHeight;
+  var tmp_w = window.innerWidth;
+  var tmp_h = parseInt(src.rows * (tmp_w / src.cols));
+  //dsize = new cv.Size(tmp_w, tmp_h);
+  cv.resize(src, dst, dsize, 0, 0, cv.INTER_AREA);
+  /*
+  // You can try more different parameters
+  var  x1 = parseInt((video.videoWidth / 2) - (window.innerWidth / 2));
+  var  x2 = parseInt((video.videoWidth / 2) + (window.innerWidth / 2));
+  var  y1 = parseInt((video.videoHeight / 2) - (window.innerHeight / 2));
+  var  y2 = parseInt((video.videoHeight / 2) + (window.innerHeight / 2));
+  let rect = new cv.Rect(x1, y1, x2, y2);
+  dst = src.roi(rect);
+  */
+  cv.imshow('canvas', dst);
+  dst.delete();
   await detectHandPose();
-  cv.imshow("canvas", src);
   //stats.end();
   requestAnimationFrame(processVideo);
 }
@@ -93,13 +109,13 @@ async function detectHandPose() {
  
     // Pass in a video stream to the model to obtain 
     // a prediction from the MediaPipe graph.
-    hands = await handmodel.estimateHands(document.querySelector("video"));
+    hands = await handmodel.estimateHands(document.querySelector("#canvas"));
     handpose_init = true;
 
   }else{
     // Pass in a video stream to the model to obtain 
     // a prediction from the MediaPipe graph.
-    hands = await handmodel.estimateHands(document.querySelector("video"));
+    hands = await handmodel.estimateHands(document.querySelector("#canvas"));
  
     // Each hand object contains a `landmarks` property,
     // which is an array of 21 3-D landmarks.

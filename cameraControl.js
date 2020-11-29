@@ -48,6 +48,7 @@ function startCamera() {
 
   video.addEventListener("canplay", function(ev){
     if (!streaming) {
+      console.log("video_size:" + video.videoWidth+ "," + video.videoHeight);
       height = video.videoHeight;
       width = video.videoWidth;
       video.setAttribute("width", width);

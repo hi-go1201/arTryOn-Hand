@@ -1,7 +1,6 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
   <title>AR Try On watch</title>
   <script src="./stats.min.js"></script>
   <script src="./three.js"></script>
@@ -10,12 +9,12 @@
   <script src="./js/loaders/GLTFLoader.js"></script>
   <script src="./js/controls/OrbitControls.js"></script>
   <!-- Require the peer dependencies of handpose. -->
-  <script src="https://unpkg.com/@tensorflow/tfjs-core@2.1.0/dist/tf-core.js"></script>
-  <script src="https://unpkg.com/@tensorflow/tfjs-converter@2.1.0/dist/tf-converter.js"></script>
+  <script src="./tf_js/tf-core.js"></script>
+  <script src="./tf_js/tf-converter.js"></script>
   <!-- You must explicitly require a TF.js backend if you're not using the tfs union bundle. -->
-  <script src="https://unpkg.com/@tensorflow/tfjs-backend-webgl@2.1.0/dist/tf-backend-webgl.js"></script>
+  <script src="./tf_js/tf-backend-webgl.js"></script>
   <!-- Alternatively you can use the WASM backend: <script src="https://unpkg.com/@tensorflow/tfjs-backend-wasm@2.1.0/dist/tf-backend-wasm.js"></script> -->
-  <script src="https://unpkg.com/@tensorflow-models/handpose@0.0.6/dist/handpose.js"></script>
+  <script src="./tf_js/handpose.js"></script>
 <style>
     body {
       margin: 0;
@@ -28,6 +27,7 @@
     <video id="video" autoplay="1" style="display: none;"></video>
     <canvas id="canvas" class="canvas" style="display: none;"></canvas>
   </div>
+  <!--script src="./occlusionTest.js" onload="addWebGL();"></script-->
   <script src="./cameraControl.js"></script>
   <script async src="./opencv.js" onload="opencvIsReady()" type="text/javascript"></script>
 </body>

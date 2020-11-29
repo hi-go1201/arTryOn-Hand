@@ -75,16 +75,17 @@ async function processVideo() {
   var tmp_w = window.innerWidth;
   var tmp_h = parseInt(src.rows * (tmp_w / src.cols));
   //dsize = new cv.Size(tmp_w, tmp_h);
-  cv.resize(src, dst, dsize, 0, 0, cv.INTER_AREA);
-  /*
+  //cv.resize(src, dst, dsize, 0, 0, cv.INTER_AREA);
+  
   // You can try more different parameters
   var  x1 = parseInt((video.videoWidth / 2) - (window.innerWidth / 2));
   var  x2 = parseInt((video.videoWidth / 2) + (window.innerWidth / 2));
   var  y1 = parseInt((video.videoHeight / 2) - (window.innerHeight / 2));
   var  y2 = parseInt((video.videoHeight / 2) + (window.innerHeight / 2));
-  let rect = new cv.Rect(x1, y1, x2, y2);
+  let rect = new cv.Rect(x1, y1, window.innerWidth, window.innerHeight);
   dst = src.roi(rect);
-  */
+  console.log("x1:"+x1+",y1:"+y1+",x2:"+x2+",y2:"+y2);
+  
   cv.imshow('canvas', dst);
   dst.delete();
   await detectHandPose();
@@ -111,6 +112,8 @@ async function detectHandPose() {
     // a prediction from the MediaPipe graph.
     hands = await handmodel.estimateHands(document.querySelector("#canvas"));
     handpose_init = true;
+
+    console.log("canvasInfo:" + document.querySelector("#canvas").width + "," + document.querySelector("#canvas").height);
 
   }else{
     // Pass in a video stream to the model to obtain 

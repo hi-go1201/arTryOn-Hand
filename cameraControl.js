@@ -24,16 +24,18 @@ function opencvIsReady() {
   startCamera();
 }
 
+//iosで動かない原因調査→audio:false, video要素にplaysinline属性が必須、video.play()必須。autoplay属性だけでは動かない場合あり
+//解像度が異なる時にバグるので最初にサイズ見てバグ回避する仕組み入れるだけでiosで動くかも
 function startCamera() {
   if (streaming) return;
   console.log("display_size:" + window.innerWidth+ "," + window.innerHeight);
   navigator.mediaDevices.getUserMedia({
+    audio: false,
     video: {
       facingMode: "environment",
       width: { min: 800, ideal: 1280, max: 1920 },
       height: { min: 600, ideal:  720, max: 1080 }
-    },
-    audio: false
+    }
   })
     .then(function(s) {
     stream = s;
@@ -58,6 +60,27 @@ function startCamera() {
   }, false);
 }
 
+function adjustVideo() {
+  // 映像が画面幅いっぱいに表示されるように調整
+  if(window.innerHeight > video.videoHeight){
+    var video_scale = window.innerHeight / video.videoHeight;
+    console.log("video_scale:" + video_scale);
+    //スマホ用にvideoソースの解像度修正
+    let dst = new cv.Mat();
+    var fix_w = parseInt(video.videoWidth * (window.innerHeight / video.videoHeight));
+    var fix_h = window.innerHeight;
+    var dsize = new cv.Size(fix_w, fix_h);
+    cv.resize(src, dst, dsize, 0, 0, cv.INTER_AREA);
+  }
+  var ratio = window.innerWidth / video.videoWidth;
+
+  video.width = window.innerWidth;
+  video.height = video.videoHeight * ratio;
+  console.log("adjust_size:" + video.width + "," + video.height);
+  //canvas.width = video.width;
+  //canvas.height = video.height;
+}
+
 function startVideoProcessing() {
   if (!streaming) { console.warn("Please startup your webcam"); return; }
   src = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
@@ -70,6 +93,45 @@ async function processVideo() {
   vc.read(src);
   //スマホ用にvideoソースの解像度修正
   let dst = new cv.Mat();
+
+  //videoソースが画面解像度より小さい時の事前修正が必要(PCでありがち)
+  /*
+  if(window.innerWidth > video.videoWidth){
+    //videoソースの横幅を画面解像度に修正
+    var fix_h = parseInt(video.videoHeight * (window.innerWidth / video.videoWidth));
+    console.log("adjust_video_size:" + window.innerWidth + "," + fix_h);
+    var dsize = new cv.Size(window.innerWidth, fix_h);
+    cv.resize(src, src, dsize, 0, 0, cv.INTER_AREA);
+  }
+  */
+
+  if(window.innerHeight > video.videoHeight){
+    //スマホ用にvideoソースの解像度修正
+    let fix_src = new cv.Mat();
+    var fix_w = parseInt(video.videoWidth * (window.innerHeight / video.videoHeight));
+    var fix_h = window.innerHeight;
+    console.log("adjust_size:" + fix_w + "," + fix_h);
+    var dsize = new cv.Size(fix_w, fix_h);
+    cv.resize(src, fix_src, dsize, 0, 0, cv.INTER_AREA);
+
+    // You can try more different parameters
+    var  x1 = parseInt((fix_w / 2) - (window.innerWidth / 2));
+    var  y1 = parseInt((fix_h / 2) - (window.innerHeight / 2));
+    //console.log("x1:"+x1+",y1:"+y1+",x2:"+x2+",y2:"+y2);
+    let rect = new cv.Rect(x1, y1, window.innerWidth, window.innerHeight);
+    dst = fix_src.roi(rect);
+    fix_src.delete();
+  } else{
+    // You can try more different parameters
+    var  x1 = parseInt((video.videoWidth / 2) - (window.innerWidth / 2));
+    var  y1 = parseInt((video.videoHeight / 2) - (window.innerHeight / 2));
+    //console.log("x1:"+x1+",y1:"+y1+",x2:"+x2+",y2:"+y2);
+    let rect = new cv.Rect(x1, y1, window.innerWidth, window.innerHeight);
+    dst = src.roi(rect);
+  }
+
+
+  /*
   let dsize = new cv.Size(window.innerWidth, window.innerHeight);
   var aspect = window.innerWidth / window.innerHeight;
   var tmp_w = window.innerWidth;
@@ -84,9 +146,9 @@ async function processVideo() {
   var  y2 = parseInt((video.videoHeight / 2) + (window.innerHeight / 2));
   //console.log("x1:"+x1+",y1:"+y1+",x2:"+x2+",y2:"+y2);
 
-  let rect = new cv.Rect(x1, y1, window.innerWidth, window.innerHeight);
-  dst = src.roi(rect);
-  
+  //let rect = new cv.Rect(x1, y1, window.innerWidth, window.innerHeight);
+  //dst = src.roi(rect);
+  */
   cv.imshow('canvas', dst);
   dst.delete();
   await detectHandPose();
@@ -409,13 +471,13 @@ function addWebGL() {
     //renderHandWatch(model_HandWatch, watch_cylinder, detectWatchArea, texture, detectWatchArea_flag);
     renderRing(model_Ring, ring_cylinder, detectRingArea, texture, detectRingArea_flag);
     //if(model_Ring!=null)model_Ring.position.set(0.0, 0.0, 0.0);
+    
+    //手首の回転に応じて深さ変更。中指と小指のmodel_info.zの大きさに応じて円柱のposition.zを微修正
     if(detectMiddleFingerArea != null){
       renderFingerOcclusion(middle_cylinder, detectMiddleFingerArea, texture);
     }
     if(detectPinkyFingerArea != null){
       renderFingerOcclusion(pinky_cylinder, detectPinkyFingerArea, texture);
-      //パラメータ調整
-      pinky_cylinder.position.x -= 0.01
     }
 
     stats.update(); // 毎フレームごとにstats.update()を呼ぶ必要がある。
@@ -494,13 +556,14 @@ function addWebGL() {
         cylinder.scale.set(scaling, scaling, scaling);
 
         // 1.指の座標を3D空間座標に変換 0:-0.4,196.5:0.0,392:0.4
+        // 左右のpositionが−1~1じゃない場合にパラメータ調整必要。現状はpixel3aに最適化
         console.log("finger_pos:[", + model_info.x + "," + model_info.y + "]");
         var finger3Dx =  (model_info.x * 2 / width) - 1.0;
         var finger3Dy = -(model_info.y * 2 / height) + 1.0;
         console.log("finger3Dpos:[", + finger3Dx*0.5 + "," + finger3Dy + "]"); 
         
         // 2.指輪を指の検出座標に移動
-        model.position.set(finger3Dx*0.5, finger3Dy, 0.0);
+        model.position.set(finger3Dx*0.5, finger3Dy, -0.02);
         //console.log("angle:" + model_info.angle);
         //console.log("distance:" + model_info.distance);
 
@@ -535,7 +598,7 @@ function addWebGL() {
         }
         //front時はrearにさせない
         if(model.view == 'front'){
-          if(Math.abs(model_info.w) >= 90 && Math.abs(model_info.w) <= 180){
+          if(Math.abs(model_info.w) >= 70 && Math.abs(model_info.w) <= 180){
             model.rotation.z = THREE.Math.degToRad(model_info.w);
           }else{
             model.rotation.z = 3.15;
@@ -548,7 +611,7 @@ function addWebGL() {
 
         // 6.指輪の位置変更に合わせてオクルージョン用の円柱も位置変更
         //パラメータ：90:0, 180:1.55→155/90 = 1.72
-        cylinder.position.set(finger3Dx*0.5, finger3Dy, 0.0);
+        cylinder.position.set(finger3Dx*0.5, finger3Dy, -0.02);
         cylinder.rotation.set(0,0,(90-model_info.angle)*0.0172);
         //console.log(cylinder.rotation.z);
 
@@ -577,7 +640,8 @@ function addWebGL() {
     //console.log("finger3Dpos:[", + finger3Dx + "," + finger3Dy + "]"); 
         
     // 2.円柱を指の検出座標に移動
-    cylinder.position.set(finger3Dx*0.5, finger3Dy, 0.0);
+    // 左右のpositionが−1~1じゃない場合にパラメータ調整必要。現状はpixel3a(-0.4~0.4)に最適化
+    cylinder.position.set(finger3Dx*0.5, finger3Dy, 0.02);
     //console.log("angle:" + model_info.angle);
     //console.log("distance:" + model_info.distance);
 

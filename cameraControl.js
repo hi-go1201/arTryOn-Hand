@@ -29,6 +29,9 @@ function opencvIsReady() {
 function startCamera() {
   if (streaming) return;
   console.log("display_size:" + window.innerWidth+ "," + window.innerHeight);
+  video.setAttribute('autoplay', '');
+  video.setAttribute('muted', '');
+  video.setAttribute('playsinline', '');
   navigator.mediaDevices.getUserMedia({
     audio: false,
     video: {

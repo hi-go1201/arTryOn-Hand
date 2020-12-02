@@ -108,7 +108,7 @@ async function processVideo() {
   cv.imshow('canvas', dst);
   adjustVideoSrc.delete();
   dst.delete();
-  await detectHandPose();
+  //await detectHandPose();
   //stats.end();
   requestAnimationFrame(processVideo);
 }

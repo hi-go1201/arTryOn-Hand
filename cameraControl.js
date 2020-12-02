@@ -60,27 +60,6 @@ function startCamera() {
   }, false);
 }
 
-function adjustVideo() {
-  // 映像が画面幅いっぱいに表示されるように調整
-  if(window.innerHeight > video.videoHeight){
-    var video_scale = window.innerHeight / video.videoHeight;
-    console.log("video_scale:" + video_scale);
-    //スマホ用にvideoソースの解像度修正
-    let dst = new cv.Mat();
-    var fix_w = parseInt(video.videoWidth * (window.innerHeight / video.videoHeight));
-    var fix_h = window.innerHeight;
-    var dsize = new cv.Size(fix_w, fix_h);
-    cv.resize(src, dst, dsize, 0, 0, cv.INTER_AREA);
-  }
-  var ratio = window.innerWidth / video.videoWidth;
-
-  video.width = window.innerWidth;
-  video.height = video.videoHeight * ratio;
-  console.log("adjust_size:" + video.width + "," + video.height);
-  //canvas.width = video.width;
-  //canvas.height = video.height;
-}
-
 function startVideoProcessing() {
   if (!streaming) { console.warn("Please startup your webcam"); return; }
   src = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
@@ -154,7 +133,7 @@ async function detectHandPose() {
     hands = await handmodel.estimateHands(document.getElementById("canvas"));
     handpose_init = true;
 
-    //console.log("canvasInfo:" + document.getElementById("canvas").width + "," + document.getElementById("canvas").height);
+    console.log("canvasInfo:" + document.getElementById("canvas").width + "," + document.getElementById("canvas").height);
 
   }else{
     // Pass in a video stream to the model to obtain 
@@ -163,8 +142,8 @@ async function detectHandPose() {
  
     // Each hand object contains a `landmarks` property,
     // which is an array of 21 3-D landmarks.
-    //hands.forEach(hand => console.log(hand.landmarks));
-    //hands.forEach(hand => console.log(hand.annotations));
+    hands.forEach(hand => console.log(hand.landmarks));
+    hands.forEach(hand => console.log(hand.annotations));
 
     //各指の座標から時計用の手首、指輪用の薬指のエリア推測する
     if(hands.length > 0) {

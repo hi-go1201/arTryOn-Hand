@@ -93,63 +93,41 @@ async function processVideo() {
   vc.read(src);
   //スマホ用にvideoソースの解像度修正
   let dst = new cv.Mat();
+  let adjustVideoSrc = new cv.Mat();
 
-  //videoソースが画面解像度より小さい時の事前修正が必要(PCでありがち)
-  /*
+  //videoソースが画面解像度より小さい時の事前修正が必要(PC,ipadでありがち)
   if(window.innerWidth > video.videoWidth){
-    //videoソースの横幅を画面解像度に修正
-    var fix_h = parseInt(video.videoHeight * (window.innerWidth / video.videoWidth));
-    console.log("adjust_video_size:" + window.innerWidth + "," + fix_h);
-    var dsize = new cv.Size(window.innerWidth, fix_h);
-    cv.resize(src, src, dsize, 0, 0, cv.INTER_AREA);
-  }
-  */
-
-  if(window.innerHeight > video.videoHeight){
-    //スマホ用にvideoソースの解像度修正
-    let fix_src = new cv.Mat();
-    var fix_w = parseInt(video.videoWidth * (window.innerHeight / video.videoHeight));
-    var fix_h = window.innerHeight;
-    console.log("adjust_size:" + fix_w + "," + fix_h);
-    var dsize = new cv.Size(fix_w, fix_h);
-    cv.resize(src, fix_src, dsize, 0, 0, cv.INTER_AREA);
-
-    // You can try more different parameters
-    var  x1 = parseInt((fix_w / 2) - (window.innerWidth / 2));
-    var  y1 = parseInt((fix_h / 2) - (window.innerHeight / 2));
-    //console.log("x1:"+x1+",y1:"+y1+",x2:"+x2+",y2:"+y2);
+    //横揃える
+    var adjustVideoHeight = parseInt(video.videoHeight * (window.innerWidth / video.videoWidth));
+    console.log("adjust_video_size:" + window.innerWidth + "," + adjustVideoHeight);
+    var adjustVideoSize = new cv.Size(window.innerWidth, adjustVideoHeight);
+    cv.resize(src, adjustVideoSrc, adjustVideoSize, 0, 0, cv.INTER_AREA);
+    //縦クロップして揃える
+    var  x1 = parseInt((adjustVideoSrc.cols / 2) - (window.innerWidth / 2));
+    var  y1 = parseInt((adjustVideoSrc.rows / 2) - (window.innerHeight / 2));
     let rect = new cv.Rect(x1, y1, window.innerWidth, window.innerHeight);
-    dst = fix_src.roi(rect);
-    fix_src.delete();
-  } else{
-    // You can try more different parameters
+    dst = adjustVideoSrc.roi(rect);
+  }else if(window.innerHeight > video.videoHeight){
+    //縦揃える
+    var adjustVideoWidth = parseInt(video.videoWidth * (window.innerHeight / video.videoHeight));
+    console.log("adjust_video_size:" + adjustVideoWidth + "," + window.innerHeight);
+    var adjustVideoSize = new cv.Size(adjustVideoWidth, window.innerHeight);
+    cv.resize(src, adjustVideoSrc, adjustVideoSize, 0, 0, cv.INTER_AREA);
+    //横クロップして揃える
+    var  x1 = parseInt((adjustVideoSrc.cols / 2) - (window.innerWidth / 2));
+    var  y1 = parseInt((adjustVideoSrc.rows / 2) - (window.innerHeight / 2));
+    let rect = new cv.Rect(x1, y1, window.innerWidth, window.innerHeight);
+    dst = adjustVideoSrc.roi(rect);
+  }else{
+    console.log("adjust_video_size:" + window.innerWidth + "," + window.innerHeight);
     var  x1 = parseInt((video.videoWidth / 2) - (window.innerWidth / 2));
     var  y1 = parseInt((video.videoHeight / 2) - (window.innerHeight / 2));
-    //console.log("x1:"+x1+",y1:"+y1+",x2:"+x2+",y2:"+y2);
     let rect = new cv.Rect(x1, y1, window.innerWidth, window.innerHeight);
     dst = src.roi(rect);
   }
-
-
-  /*
-  let dsize = new cv.Size(window.innerWidth, window.innerHeight);
-  var aspect = window.innerWidth / window.innerHeight;
-  var tmp_w = window.innerWidth;
-  var tmp_h = parseInt(src.rows * (tmp_w / src.cols));
-  //dsize = new cv.Size(tmp_w, tmp_h);
-  //cv.resize(src, dst, dsize, 0, 0, cv.INTER_AREA);
   
-  // You can try more different parameters
-  var  x1 = parseInt((video.videoWidth / 2) - (window.innerWidth / 2));
-  var  x2 = parseInt((video.videoWidth / 2) + (window.innerWidth / 2));
-  var  y1 = parseInt((video.videoHeight / 2) - (window.innerHeight / 2));
-  var  y2 = parseInt((video.videoHeight / 2) + (window.innerHeight / 2));
-  //console.log("x1:"+x1+",y1:"+y1+",x2:"+x2+",y2:"+y2);
-
-  //let rect = new cv.Rect(x1, y1, window.innerWidth, window.innerHeight);
-  //dst = src.roi(rect);
-  */
   cv.imshow('canvas', dst);
+  adjustVideoSrc.delete();
   dst.delete();
   await detectHandPose();
   //stats.end();

@@ -35,7 +35,7 @@ function startCamera() {
   navigator.mediaDevices.getUserMedia({
     audio: false,
     video: {
-      facingMode: "environment",
+      facingMode: 'user',
       width: 1280,
       height: 720
     }

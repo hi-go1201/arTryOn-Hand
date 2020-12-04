@@ -25,13 +25,13 @@ function opencvIsReady() {
 }
 
 //iosで動かない原因調査→audio:false, video要素にplaysinline属性が必須、video.play()必須。autoplay属性だけでは動かない場合あり
-//解像度が異なる時にバグるので最初にサイズ見てバグ回避する仕組み入れるだけでiosで動くかも
+//camera解像度一定にしても動かない？要追加調査
 function startCamera() {
   if (streaming) return;
   console.log("display_size:" + window.innerWidth+ "," + window.innerHeight);
-  video.setAttribute('autoplay', '');
-  video.setAttribute('muted', '');
-  video.setAttribute('playsinline', '');
+  video.setAttribute('autoplay', 'true');
+  video.setAttribute('muted', 'true');
+  video.setAttribute('playsinline', 'true');
   navigator.mediaDevices.getUserMedia({
     audio: false,
     video: {

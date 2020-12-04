@@ -50,10 +50,8 @@ function startCamera() {
   video.addEventListener("canplay", function(ev){
     if (!streaming) {
       console.log("video_size:" + video.videoWidth+ "," + video.videoHeight);
-      width = video.videoWidth;
-      height = video.videoHeight;
-      video.setAttribute("width", width);
-      video.setAttribute("height", height);
+      video.setAttribute("width", video.videoWidth);
+      video.setAttribute("height", video.videoHeight);
       streaming = true;
       vc = new cv.VideoCapture(video);
     }
@@ -420,6 +418,7 @@ function addWebGL() {
   //document.body.appendChild( renderer.domElement );
   document.getElementById("main").appendChild(renderer.domElement);
   renderer.domElement.id = "webgl";
+
   // カメラ制御
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.target.set(0, 0, 0);
@@ -464,15 +463,29 @@ function addWebGL() {
     texture.repeat.y = aspect > 1 ? 1 : aspect;
 
     //renderHandWatch(model_HandWatch, watch_cylinder, detectWatchArea, texture, detectWatchArea_flag);
-    renderRing(model_Ring, ring_cylinder, detectRingArea, texture, detectRingArea_flag);
+    renderRing(model_Ring, ring_cylinder, detectRingArea, detectRingArea_flag);
     //if(model_Ring!=null)model_Ring.position.set(0.0, 0.0, 0.0);
     
     //手首の回転に応じて深さ変更。中指と小指のmodel_info.zの大きさに応じて円柱のposition.zを微修正
-    if(detectMiddleFingerArea != null){
-      renderFingerOcclusion(middle_cylinder, detectMiddleFingerArea, texture);
-    }
-    if(detectPinkyFingerArea != null){
-      renderFingerOcclusion(pinky_cylinder, detectPinkyFingerArea, texture);
+    if(detectMiddleFingerArea != null && detectPinkyFingerArea != null){
+      renderFingerOcclusion(middle_cylinder, detectMiddleFingerArea);
+      renderFingerOcclusion(pinky_cylinder, detectPinkyFingerArea);
+
+      //中指と小指のmodel_info.zの大きさに応じて円柱のposition.zを微修正
+      if(detectMiddleFingerArea.z < detectPinkyFingerArea.z){
+        //console.log("middle_z:", + detectMiddleFingerArea.z);
+        //console.log("pinky_z:", + detectPinkyFingerArea.z);
+        middle_cylinder.position.z = 0.02;
+        ring_cylinder.position.z = 0.00;
+        pinky_cylinder.position.z = -0.02;
+      }else{
+        //console.log("middle_z:", + detectMiddleFingerArea.z);
+        //console.log("pinky_z:", + detectPinkyFingerArea.z);
+        middle_cylinder.position.z = -0.02;
+        ring_cylinder.position.z = 0.00;
+        pinky_cylinder.position.z = 0.02;
+      }
+      
     }
 
     stats.update(); // 毎フレームごとにstats.update()を呼ぶ必要がある。
@@ -536,9 +549,7 @@ function addWebGL() {
     }
   }
 
-  function renderRing(model, cylinder, model_info, texture, flag){
-    const width = window.innerWidth; // rendererのサイズ
-    const height = window.innerHeight;
+  function renderRing(model, cylinder, model_info, flag){
     if(model != null){
       //console.log(model);
       //console.log(model_info);
@@ -553,12 +564,12 @@ function addWebGL() {
         // 1.指の座標を3D空間座標に変換 0:-0.4,196.5:0.0,392:0.4
         // 左右のpositionが−1~1じゃない場合にパラメータ調整必要。現状はpixel3aに最適化
         console.log("finger_pos:[", + model_info.x + "," + model_info.y + "]");
-        var finger3Dx =  (model_info.x * 2 / width) - 1.0;
-        var finger3Dy = -(model_info.y * 2 / height) + 1.0;
+        var finger3Dx =  (model_info.x * 2 / window.innerWidth) - 1.0;
+        var finger3Dy = -(model_info.y * 2 / window.innerHeight) + 1.0;
         console.log("finger3Dpos:[", + finger3Dx*0.5 + "," + finger3Dy + "]"); 
         
         // 2.指輪を指の検出座標に移動
-        model.position.set(finger3Dx*0.5, finger3Dy, -0.02);
+        model.position.set(finger3Dx*0.5, finger3Dy, 0.0);
         //console.log("angle:" + model_info.angle);
         //console.log("distance:" + model_info.distance);
 
@@ -606,7 +617,7 @@ function addWebGL() {
 
         // 6.指輪の位置変更に合わせてオクルージョン用の円柱も位置変更
         //パラメータ：90:0, 180:1.55→155/90 = 1.72
-        cylinder.position.set(finger3Dx*0.5, finger3Dy, -0.02);
+        cylinder.position.set(finger3Dx*0.5, finger3Dy, 0.0);
         cylinder.rotation.set(0,0,(90-model_info.angle)*0.0172);
         //console.log(cylinder.rotation.z);
 
@@ -619,9 +630,7 @@ function addWebGL() {
     }
   }
 
-  function renderFingerOcclusion(cylinder, model_info, texture){
-    const width = window.innerWidth; // rendererのサイズ
-    const height = window.innerHeight;
+  function renderFingerOcclusion(cylinder, model_info){
     // 1.指の座標を3D空間座標に変換
     //console.log("finger_pos:[", + model_info.x + "," + model_info.y + "]");
 
@@ -630,13 +639,13 @@ function addWebGL() {
     var scaling = model_info.distance / 110;
     cylinder.scale.set(scaling, scaling, scaling);
 
-    var finger3Dx =  (model_info.x * 2 / width) - 1.0;
-    var finger3Dy = -(model_info.y * 2 / height) + 1.0;
+    var finger3Dx =  (model_info.x * 2 / window.innerWidth) - 1.0;
+    var finger3Dy = -(model_info.y * 2 / window.innerHeight) + 1.0;
     //console.log("finger3Dpos:[", + finger3Dx + "," + finger3Dy + "]"); 
         
     // 2.円柱を指の検出座標に移動
     // 左右のpositionが−1~1じゃない場合にパラメータ調整必要。現状はpixel3a(-0.4~0.4)に最適化
-    cylinder.position.set(finger3Dx*0.5, finger3Dy, 0.02);
+    cylinder.position.set(finger3Dx*0.5, finger3Dy, 0.0);
     //console.log("angle:" + model_info.angle);
     //console.log("distance:" + model_info.distance);
 
@@ -647,11 +656,6 @@ function addWebGL() {
     //cylinder.position.set(finger3Dx, finger3Dy, 0.0);
     cylinder.rotation.set(0,0,(90-model_info.angle)*0.0172);
     //console.log(cylinder.rotation.z);
-    
-    
-    //ToDo:描画処理順の修正
-    //cylinder.position.z = model_info.z;
-    //console.log("renderFingerOcclusion_z:" + cylinder.position.z);
   }
   
 }

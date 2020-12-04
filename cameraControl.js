@@ -412,7 +412,33 @@ function addWebGL() {
     time *= 0.001;
 
     // create camera image
-    var texture = new THREE.Texture(document.getElementById('video'));
+    //var texture = '';
+    const texture = new THREE.VideoTexture( video );
+
+		const geometry = new THREE.PlaneBufferGeometry( 16, 9 );
+		geometry.scale( 0.5, 0.5, 0.5 );
+		const material = new THREE.MeshBasicMaterial( { map: texture } );
+
+		const count = 128;
+		const radius = 32;
+
+		for ( let i = 1, l = count; i <= l; i ++ ) {
+
+				const phi = Math.acos( - 1 + ( 2 * i ) / l );
+				const theta = Math.sqrt( l * Math.PI ) * phi;
+
+				const mesh = new THREE.Mesh( geometry, material );
+				mesh.position.setFromSphericalCoords( radius, phi, theta );
+				mesh.lookAt( camera.position );
+				scene.add( mesh );
+
+		}
+
+
+
+
+    /*
+    var texture = new THREE.Texture(document.getElementById('canvas'));
     texture.needsUpdate = true; 
     scene.background = texture;
     // Set the repeat and offset properties of the background texture
@@ -427,7 +453,7 @@ function addWebGL() {
 
     texture.offset.y = aspect > 1 ? 0 : (1 - aspect) / 2;
     texture.repeat.y = aspect > 1 ? 1 : aspect;
-
+    */
     //renderHandWatch(model_HandWatch, watch_cylinder, detectWatchArea, texture, detectWatchArea_flag);
     renderRing(model_Ring, ring_cylinder, detectRingArea, texture, detectRingArea_flag);
     //if(model_Ring!=null)model_Ring.position.set(0.0, 0.0, 0.0);

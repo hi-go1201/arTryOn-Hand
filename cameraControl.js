@@ -2,6 +2,7 @@
 let streaming = false;
 
 let video = document.getElementById("video");
+
 let stream = null;
 let vc = null;
 let src = null;
@@ -29,28 +30,22 @@ function opencvIsReady() {
 function startCamera() {
   if (streaming) return;
   console.log("display_size:" + window.innerWidth+ "," + window.innerHeight);
-  if ( navigator.mediaDevices && navigator.mediaDevices.getUserMedia ) {
-
-    const constraints = { video: { width: 1280, height: 720, facingMode: 'environment' } };
-
-    navigator.mediaDevices.getUserMedia( constraints ).then( function ( stream ) {
-
-      // apply the stream to the video element used in the texture
-
-      video.srcObject = stream;
-      video.play();
-
-    } ).catch( function ( error ) {
-
-      console.error( 'Unable to access the camera/webcam.', error );
-
-    } );
-
-  } else {
-
-    console.error( 'MediaDevices interface not available.' );
-
-  }
+  navigator.mediaDevices.getUserMedia({
+    audio: false,
+    video: {
+      facingMode: "environment",
+      width: { min: 800, ideal: 1280, max: 1920 },
+      height: { min: 600, ideal:  720, max: 1080 }
+    }
+  })
+    .then(function(s) {
+    stream = s;
+    video.srcObject = s;
+    video.play();
+  })
+    .catch(function(err) {
+    console.log("An error occured! " + err);
+  });
 
   video.addEventListener("canplay", function(ev){
     if (!streaming) {
@@ -111,7 +106,7 @@ async function processVideo() {
     dst = src.roi(rect);
   }
   
-  //cv.imshow('canvas', dst);
+  cv.imshow('canvas', dst);
   adjustVideoSrc.delete();
   dst.delete();
   //await detectHandPose();
@@ -273,29 +268,6 @@ function addWebGL() {
 
   const scene = new THREE.Scene();
 
-
-  // create camera image
-  const texture = new THREE.VideoTexture( video );
-
-	const geometry = new THREE.PlaneBufferGeometry( 16, 9 );
-	geometry.scale( 0.5, 0.5, 0.5 );
-	const material = new THREE.MeshBasicMaterial( { map: texture } );
-
-	const count = 128;
-	const radius = 32;
-
-	for ( let i = 1, l = count; i <= l; i ++ ) {
-
-			const phi = Math.acos( - 1 + ( 2 * i ) / l );
-			const theta = Math.sqrt( l * Math.PI ) * phi;
-
-			const mesh = new THREE.Mesh( geometry, material );
-			mesh.position.setFromSphericalCoords( radius, phi, theta );
-			mesh.lookAt( camera.position );
-			scene.add( mesh );
-
-	}
-
   // Create lights
   var light = new THREE.PointLight(0xEEEEEE);
   light.position.set(20, 0, 20);
@@ -409,8 +381,8 @@ function addWebGL() {
   renderer.autoClear = false; // To allow render overlay on top of sprited sphere
 
   //document.body.appendChild( renderer.domElement );
-  document.body.appendChild( renderer.domElement );
-
+  document.getElementById("main").appendChild(renderer.domElement);
+  renderer.domElement.id = "webgl";
   // カメラ制御
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.target.set(0, 0, 0);
@@ -437,12 +409,7 @@ function addWebGL() {
 
     time *= 0.001;
 
-    
-
-
-
-
-    /*
+    // create camera image
     var texture = new THREE.Texture(document.getElementById('canvas'));
     texture.needsUpdate = true; 
     scene.background = texture;
@@ -458,7 +425,7 @@ function addWebGL() {
 
     texture.offset.y = aspect > 1 ? 0 : (1 - aspect) / 2;
     texture.repeat.y = aspect > 1 ? 1 : aspect;
-    */
+
     //renderHandWatch(model_HandWatch, watch_cylinder, detectWatchArea, texture, detectWatchArea_flag);
     renderRing(model_Ring, ring_cylinder, detectRingArea, texture, detectRingArea_flag);
     //if(model_Ring!=null)model_Ring.position.set(0.0, 0.0, 0.0);
@@ -473,11 +440,10 @@ function addWebGL() {
 
     stats.update(); // 毎フレームごとにstats.update()を呼ぶ必要がある。
 
-    //renderer.clear();
-    //renderer.clearDepth();
-    requestAnimationFrame(render);
+    renderer.clear();
+    renderer.clearDepth();
     renderer.render( scene, camera );
-    //requestAnimationFrame(render);
+    requestAnimationFrame(render);
   }
 
   function renderHandWatch(model, cylinder, model_info, texture, flag){

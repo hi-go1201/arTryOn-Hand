@@ -67,7 +67,7 @@ function startVideoProcessing() {
   if (!streaming) { console.warn("Please startup your webcam"); return; }
   src = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
   requestAnimationFrame(processVideo);
-  addWebGL();
+  //addWebGL();
 }
 
 async function processVideo() {
@@ -108,7 +108,7 @@ async function processVideo() {
     dst = src.roi(rect);
   }
   
-  //cv.imshow('canvas', dst);
+  cv.imshow('canvas', dst);
   adjustVideoSrc.delete();
   dst.delete();
   //await detectHandPose();

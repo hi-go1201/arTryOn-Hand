@@ -67,7 +67,7 @@ function startVideoProcessing() {
   if (!streaming) { console.warn("Please startup your webcam"); return; }
   src = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
   requestAnimationFrame(processVideo);
-  //addWebGL();
+  addWebGL();
 }
 
 async function processVideo() {
@@ -412,8 +412,14 @@ function addWebGL() {
     time *= 0.001;
 
     // create camera image
-    var texture = new THREE.Texture(document.getElementById('canvas'));
-    texture.needsUpdate = true; 
+    //var texture = new THREE.Texture(document.getElementById('canvas'));
+    const texture = new THREE.Texture(
+      document.getElementById('canvas'), THREE.UVMapping, THREE.ClampToEdgeWrapping,
+      THREE.ClampToEdgeWrapping);
+    texture.generateMipmaps = false;
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.needsUpdate = true;
     scene.background = texture;
     // Set the repeat and offset properties of the background texture
     // to keep the image's aspect correct.

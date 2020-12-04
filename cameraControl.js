@@ -273,6 +273,29 @@ function addWebGL() {
 
   const scene = new THREE.Scene();
 
+
+  // create camera image
+  const texture = new THREE.VideoTexture( video );
+
+	const geometry = new THREE.PlaneBufferGeometry( 16, 9 );
+	geometry.scale( 0.5, 0.5, 0.5 );
+	const material = new THREE.MeshBasicMaterial( { map: texture } );
+
+	const count = 128;
+	const radius = 32;
+
+	for ( let i = 1, l = count; i <= l; i ++ ) {
+
+			const phi = Math.acos( - 1 + ( 2 * i ) / l );
+			const theta = Math.sqrt( l * Math.PI ) * phi;
+
+			const mesh = new THREE.Mesh( geometry, material );
+			mesh.position.setFromSphericalCoords( radius, phi, theta );
+			mesh.lookAt( camera.position );
+			scene.add( mesh );
+
+	}
+
   // Create lights
   var light = new THREE.PointLight(0xEEEEEE);
   light.position.set(20, 0, 20);
@@ -386,8 +409,8 @@ function addWebGL() {
   renderer.autoClear = false; // To allow render overlay on top of sprited sphere
 
   //document.body.appendChild( renderer.domElement );
-  document.getElementById("main").appendChild(renderer.domElement);
-  renderer.domElement.id = "webgl";
+  document.body.appendChild( renderer.domElement );
+
   // カメラ制御
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.target.set(0, 0, 0);
@@ -414,28 +437,7 @@ function addWebGL() {
 
     time *= 0.001;
 
-    // create camera image
-    //var texture = '';
-    const texture = new THREE.VideoTexture( video );
-
-		const geometry = new THREE.PlaneBufferGeometry( 16, 9 );
-		geometry.scale( 0.5, 0.5, 0.5 );
-		const material = new THREE.MeshBasicMaterial( { map: texture } );
-
-		const count = 128;
-		const radius = 32;
-
-		for ( let i = 1, l = count; i <= l; i ++ ) {
-
-				const phi = Math.acos( - 1 + ( 2 * i ) / l );
-				const theta = Math.sqrt( l * Math.PI ) * phi;
-
-				const mesh = new THREE.Mesh( geometry, material );
-				mesh.position.setFromSphericalCoords( radius, phi, theta );
-				mesh.lookAt( camera.position );
-				scene.add( mesh );
-
-		}
+    
 
 
 
@@ -471,10 +473,11 @@ function addWebGL() {
 
     stats.update(); // 毎フレームごとにstats.update()を呼ぶ必要がある。
 
-    renderer.clear();
-    renderer.clearDepth();
-    renderer.render( scene, camera );
+    //renderer.clear();
+    //renderer.clearDepth();
     requestAnimationFrame(render);
+    renderer.render( scene, camera );
+    //requestAnimationFrame(render);
   }
 
   function renderHandWatch(model, cylinder, model_info, texture, flag){

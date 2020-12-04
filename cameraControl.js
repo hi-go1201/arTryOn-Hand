@@ -36,8 +36,8 @@ function startCamera() {
     audio: false,
     video: {
       facingMode: "environment",
-      width: { min: 800, ideal: 1280, max: 1920 },
-      height: { min: 600, ideal:  720, max: 1080 }
+      width: 1280,
+      height: 720
     }
   })
     .then(function(s) {

@@ -108,7 +108,7 @@ async function processVideo() {
     dst = src.roi(rect);
   }
   
-  cv.imshow('canvas', dst);
+  //cv.imshow('canvas', dst);
   adjustVideoSrc.delete();
   dst.delete();
   //await detectHandPose();

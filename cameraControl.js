@@ -413,7 +413,7 @@ function addWebGL() {
 
     // create camera image
     //var texture = new THREE.Texture(document.getElementById('canvas'));
-    const texture = new THREE.Texture(
+    var texture = new THREE.Texture(
       document.getElementById('canvas'), THREE.UVMapping, THREE.ClampToEdgeWrapping,
       THREE.ClampToEdgeWrapping);
     texture.generateMipmaps = false;

@@ -29,25 +29,28 @@ function opencvIsReady() {
 function startCamera() {
   if (streaming) return;
   console.log("display_size:" + window.innerWidth+ "," + window.innerHeight);
-  video.setAttribute('autoplay', true);
-  video.setAttribute('muted', true);
-  video.setAttribute('playsinline', true);
-  navigator.mediaDevices.getUserMedia({
-    audio: false,
-    video: {
-      facingMode: 'user',
-      width: 1280,
-      height: 720
-    }
-  })
-    .then(function(s) {
-    stream = s;
-    video.srcObject = s;
-    video.play();
-  })
-    .catch(function(err) {
-    console.log("An error occured! " + err);
-  });
+  if ( navigator.mediaDevices && navigator.mediaDevices.getUserMedia ) {
+
+    const constraints = { video: { width: 1280, height: 720, facingMode: 'environment' } };
+
+    navigator.mediaDevices.getUserMedia( constraints ).then( function ( stream ) {
+
+      // apply the stream to the video element used in the texture
+
+      video.srcObject = stream;
+      video.play();
+
+    } ).catch( function ( error ) {
+
+      console.error( 'Unable to access the camera/webcam.', error );
+
+    } );
+
+  } else {
+
+    console.error( 'MediaDevices interface not available.' );
+
+  }
 
   video.addEventListener("canplay", function(ev){
     if (!streaming) {
@@ -108,7 +111,7 @@ async function processVideo() {
     dst = src.roi(rect);
   }
   
-  cv.imshow('canvas', dst);
+  //cv.imshow('canvas', dst);
   adjustVideoSrc.delete();
   dst.delete();
   //await detectHandPose();

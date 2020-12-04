@@ -412,14 +412,8 @@ function addWebGL() {
     time *= 0.001;
 
     // create camera image
-    //var texture = new THREE.Texture(document.getElementById('canvas'));
-    var texture = new THREE.Texture(
-      document.getElementById('canvas'), THREE.UVMapping, THREE.ClampToEdgeWrapping,
-      THREE.ClampToEdgeWrapping);
-    texture.generateMipmaps = false;
-    texture.minFilter = THREE.LinearFilter;
-    texture.magFilter = THREE.LinearFilter;
-    texture.needsUpdate = true;
+    var texture = new THREE.Texture(document.getElementById('video'));
+    texture.needsUpdate = true; 
     scene.background = texture;
     // Set the repeat and offset properties of the background texture
     // to keep the image's aspect correct.

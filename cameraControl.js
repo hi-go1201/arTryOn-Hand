@@ -74,32 +74,68 @@ async function processVideo() {
   //スマホ用にvideoソースの解像度修正
   let dst = new cv.Mat();
   let adjustVideoSrc = new cv.Mat();
+  let adjustVideoSrc2 = new cv.Mat();
 
   //videoソースが画面解像度より小さい時の事前修正が必要(PC,ipadでありがち)
   if(window.innerWidth > video.videoWidth){
-    //横揃える
+    //1-1 横揃える
     var adjustVideoHeight = parseInt(video.videoHeight * (window.innerWidth / video.videoWidth));
-    console.log("adjust_video_size:" + window.innerWidth + "," + adjustVideoHeight);
+    console.log("adjust_video_size 1-1:" + window.innerWidth + "," + adjustVideoHeight);
     var adjustVideoSize = new cv.Size(window.innerWidth, adjustVideoHeight);
     cv.resize(src, adjustVideoSrc, adjustVideoSize, 0, 0, cv.INTER_AREA);
-    //縦クロップして揃える
-    var  x1 = parseInt((adjustVideoSrc.cols / 2) - (window.innerWidth / 2));
-    var  y1 = parseInt((adjustVideoSrc.rows / 2) - (window.innerHeight / 2));
-    let rect = new cv.Rect(x1, y1, window.innerWidth, window.innerHeight);
-    dst = adjustVideoSrc.roi(rect);
+
+    //1-2 縦揃える
+    if(window.innerHeight > adjustVideoSrc.rows){
+      var adjustVideoWidth = parseInt(adjustVideoSrc.cols * (window.innerHeight / adjustVideoSrc.rows));
+      console.log("adjust_video_size 1-2:" + adjustVideoWidth + "," + adjustVideoSrc.rows);
+      adjustVideoSize = new cv.Size(adjustVideoWidth, window.innerHeight);
+      cv.resize(adjustVideoSrc, adjustVideoSrc2, adjustVideoSize, 0, 0, cv.INTER_AREA);
+      //クロップ
+      var  x1 = parseInt((adjustVideoSrc2.cols / 2) - (window.innerWidth / 2));
+      var  y1 = parseInt((adjustVideoSrc2.rows / 2) - (window.innerHeight / 2));
+      let rect = new cv.Rect(x1, y1, window.innerWidth, window.innerHeight);
+      dst = adjustVideoSrc2.roi(rect);
+
+    }else{
+
+      //1-2 縦クロップして揃える
+      var  x1 = parseInt((adjustVideoSrc.cols / 2) - (window.innerWidth / 2));
+      var  y1 = parseInt((adjustVideoSrc.rows / 2) - (window.innerHeight / 2));
+      let rect = new cv.Rect(x1, y1, window.innerWidth, window.innerHeight);
+      dst = adjustVideoSrc.roi(rect);
+
+    }
   }else if(window.innerHeight > video.videoHeight){
-    //縦揃える
+    //2-1 縦揃える
     var adjustVideoWidth = parseInt(video.videoWidth * (window.innerHeight / video.videoHeight));
-    console.log("adjust_video_size:" + adjustVideoWidth + "," + window.innerHeight);
+    console.log("adjust_video_size 2-1:" + adjustVideoWidth + "," + window.innerHeight);
     var adjustVideoSize = new cv.Size(adjustVideoWidth, window.innerHeight);
     cv.resize(src, adjustVideoSrc, adjustVideoSize, 0, 0, cv.INTER_AREA);
-    //横クロップして揃える
-    var  x1 = parseInt((adjustVideoSrc.cols / 2) - (window.innerWidth / 2));
-    var  y1 = parseInt((adjustVideoSrc.rows / 2) - (window.innerHeight / 2));
-    let rect = new cv.Rect(x1, y1, window.innerWidth, window.innerHeight);
-    dst = adjustVideoSrc.roi(rect);
+
+    //2-2 横揃える
+    if(window.innerWidth > adjustVideoSrc.cols){
+      var adjustVideoHeight = parseInt(adjustVideoSrc.rows * (window.innerWidth / adjustVideoSrc.cols));
+      console.log("adjust_video_size 2-2:" + window.innerWidth + "," + adjustVideoHeight);
+      adjustVideoSize = new cv.Size(window.innerWidth, adjustVideoHeight);
+      cv.resize(adjustVideoSrc, adjustVideoSrc2, adjustVideoSize, 0, 0, cv.INTER_AREA);
+      //クロップ
+      var  x1 = parseInt((adjustVideoSrc2.cols / 2) - (window.innerWidth / 2));
+      var  y1 = parseInt((adjustVideoSrc2.rows / 2) - (window.innerHeight / 2));
+      let rect = new cv.Rect(x1, y1, window.innerWidth, window.innerHeight);
+      dst = adjustVideoSrc2.roi(rect);
+
+    }else{
+
+      //2−2 横クロップして揃える
+      var  x1 = parseInt((adjustVideoSrc.cols / 2) - (window.innerWidth / 2));
+      var  y1 = parseInt((adjustVideoSrc.rows / 2) - (window.innerHeight / 2));
+      let rect = new cv.Rect(x1, y1, window.innerWidth, window.innerHeight);
+      dst = adjustVideoSrc.roi(rect);
+
+    }
   }else{
-    console.log("adjust_video_size:" + window.innerWidth + "," + window.innerHeight);
+    //3 中心をクロップして揃える
+    console.log("adjust_video_size 3:" + window.innerWidth + "," + window.innerHeight);
     var  x1 = parseInt((video.videoWidth / 2) - (window.innerWidth / 2));
     var  y1 = parseInt((video.videoHeight / 2) - (window.innerHeight / 2));
     let rect = new cv.Rect(x1, y1, window.innerWidth, window.innerHeight);
@@ -108,8 +144,9 @@ async function processVideo() {
   
   cv.imshow('canvas', dst);
   adjustVideoSrc.delete();
+  adjustVideoSrc2.delete();
   dst.delete();
-  //await detectHandPose();
+  await detectHandPose();
   //stats.end();
   requestAnimationFrame(processVideo);
 }
@@ -134,7 +171,7 @@ async function detectHandPose() {
     hands = await handmodel.estimateHands(document.getElementById("canvas"));
     handpose_init = true;
 
-    console.log("canvasInfo:" + document.getElementById("canvas").width + "," + document.getElementById("canvas").height);
+    //console.log("canvasInfo:" + document.getElementById("canvas").width + "," + document.getElementById("canvas").height);
 
   }else{
     // Pass in a video stream to the model to obtain 
@@ -143,8 +180,8 @@ async function detectHandPose() {
  
     // Each hand object contains a `landmarks` property,
     // which is an array of 21 3-D landmarks.
-    hands.forEach(hand => console.log(hand.landmarks));
-    hands.forEach(hand => console.log(hand.annotations));
+    //hands.forEach(hand => console.log(hand.landmarks));
+    //hands.forEach(hand => console.log(hand.annotations));
 
     //各指の座標から時計用の手首、指輪用の薬指のエリア推測する
     if(hands.length > 0) {

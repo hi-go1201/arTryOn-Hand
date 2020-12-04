@@ -16,11 +16,17 @@
   <script src="https://unpkg.com/@tensorflow/tfjs-backend-webgl@2.1.0/dist/tf-backend-webgl.js"></script>
   <!-- Alternatively you can use the WASM backend: <script src="https://unpkg.com/@tensorflow/tfjs-backend-wasm@2.1.0/dist/tf-backend-wasm.js"></script> -->
   <script src="https://unpkg.com/@tensorflow-models/handpose@0.0.6/dist/handpose.js"></script>
+<style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
 </head>
 <body>
   <div id="main">
-    <video id="video" style="display: none;" autoplay playsinline></video>
-    <canvas id="canvas" class="canvas" style="display: none;"></canvas>
+    <video id="video" style="display: none;"autoplay playsinline></video>
+    <canvas id="canvas" style="display: none;"></canvas>
   </div>
   <!--script src="./occlusionTest.js" onload="addWebGL();"></script-->
   <script src="./cameraControl.js"></script>

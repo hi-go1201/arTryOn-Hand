@@ -422,7 +422,7 @@ function addWebGL() {
   renderer.domElement.style.position = 'absolute';
   renderer.domElement.style.top = '0px';
   renderer.domElement.style.left = '0px';
-  document.body.appendChild(renderer.domElement);
+  //document.body.appendChild(renderer.domElement);
   renderer.autoClear = false; // To allow render overlay on top of sprited sphere
 
   //document.body.appendChild( renderer.domElement );

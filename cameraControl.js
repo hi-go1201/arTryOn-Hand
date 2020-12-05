@@ -416,15 +416,15 @@ function addWebGL() {
   renderer.setClearColor(new THREE.Color(), 0);
   renderer.setPixelRatio( window.devicePixelRatio );
   renderer.setSize( window.innerWidth, window.innerHeight );
-  renderer.domElement.style.position = 'absolute';
-  renderer.domElement.style.top = '0px';
-  renderer.domElement.style.left = '0px';
+  //renderer.domElement.style.position = 'absolute';
+  //renderer.domElement.style.top = '0px';
+  //renderer.domElement.style.left = '0px';
   document.body.appendChild(renderer.domElement);
   renderer.autoClear = false; // To allow render overlay on top of sprited sphere
 
   //document.body.appendChild( renderer.domElement );
-  //document.getElementById("main").appendChild(renderer.domElement);
-  //renderer.domElement.id = "webgl";
+  document.getElementById("main").appendChild(renderer.domElement);
+  renderer.domElement.id = "webgl";
 
   // カメラ制御
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -451,11 +451,11 @@ function addWebGL() {
   function render(time) {
 
     time *= 0.001;
-    /*
+    
     // create camera image
     var texture = new THREE.Texture(document.getElementById('canvas'));
     texture.needsUpdate = true; 
-    //scene.background = texture;
+    scene.background = texture;
     // Set the repeat and offset properties of the background texture
     // to keep the image's aspect correct.
     // Note the image may not have loaded yet.
@@ -468,7 +468,7 @@ function addWebGL() {
 
     texture.offset.y = aspect > 1 ? 0 : (1 - aspect) / 2;
     texture.repeat.y = aspect > 1 ? 1 : aspect;
-    */
+    
     //renderHandWatch(model_HandWatch, watch_cylinder, detectWatchArea, texture, detectWatchArea_flag);
     renderRing(model_Ring, ring_cylinder, detectRingArea, detectRingArea_flag);
     //if(model_Ring!=null)model_Ring.position.set(0.0, 0.0, 0.0);

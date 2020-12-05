@@ -168,7 +168,7 @@ async function detectHandPose() {
  
     // Pass in a video stream to the model to obtain 
     // a prediction from the MediaPipe graph.
-    hands = await handmodel.estimateHands(document.getElementById("canvas"));
+    //hands = await handmodel.estimateHands(document.getElementById("canvas"));
     handpose_init = true;
 
     //console.log("canvasInfo:" + document.getElementById("canvas").width + "," + document.getElementById("canvas").height);
@@ -416,9 +416,9 @@ function addWebGL() {
   renderer.setClearColor(new THREE.Color(), 0);
   renderer.setPixelRatio( window.devicePixelRatio );
   renderer.setSize( window.innerWidth, window.innerHeight );
-  //renderer.domElement.style.position = 'absolute';
-  //renderer.domElement.style.top = '0px';
-  //renderer.domElement.style.left = '0px';
+  renderer.domElement.style.position = 'absolute';
+  renderer.domElement.style.top = '0px';
+  renderer.domElement.style.left = '0px';
   document.body.appendChild(renderer.domElement);
   renderer.autoClear = false; // To allow render overlay on top of sprited sphere
 
@@ -453,7 +453,13 @@ function addWebGL() {
     time *= 0.001;
     
     // create camera image
-    var texture = new THREE.Texture(document.getElementById('canvas'));
+    //var texture = new THREE.Texture(document.getElementById('canvas'));
+    const texture = new THREE.Texture(
+      document.getElementById('canvas'), THREE.UVMapping, THREE.ClampToEdgeWrapping,
+      THREE.ClampToEdgeWrapping);
+    texture.generateMipmaps = false;
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
     texture.needsUpdate = true; 
     scene.background = texture;
     // Set the repeat and offset properties of the background texture

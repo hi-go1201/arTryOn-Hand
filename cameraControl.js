@@ -449,7 +449,7 @@ function addWebGL() {
   function render(time) {
 
     time *= 0.001;
-
+    /*
     // create camera image
     var texture = new THREE.Texture(document.getElementById('canvas'));
     texture.needsUpdate = true; 
@@ -466,7 +466,7 @@ function addWebGL() {
 
     texture.offset.y = aspect > 1 ? 0 : (1 - aspect) / 2;
     texture.repeat.y = aspect > 1 ? 1 : aspect;
-
+    */
     //renderHandWatch(model_HandWatch, watch_cylinder, detectWatchArea, texture, detectWatchArea_flag);
     renderRing(model_Ring, ring_cylinder, detectRingArea, detectRingArea_flag);
     //if(model_Ring!=null)model_Ring.position.set(0.0, 0.0, 0.0);

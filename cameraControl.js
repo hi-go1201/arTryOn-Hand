@@ -63,7 +63,9 @@ function startVideoProcessing() {
   if (!streaming) { console.warn("Please startup your webcam"); return; }
   src = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
   requestAnimationFrame(processVideo);
-  addWebGL();
+  setTimeout(() => {
+    addWebGL();
+  }, 2000);
 }
 
 async function processVideo() {

@@ -85,14 +85,14 @@ async function processVideo() {
     if (window.innerWidth > video.videoWidth) {
         //1-1 横揃える
         var adjustVideoHeight = parseInt(video.videoHeight * (window.innerWidth / video.videoWidth));
-        console.log("adjust_video_size 1-1:" + window.innerWidth + "," + adjustVideoHeight);
+        //console.log("adjust_video_size 1-1:" + window.innerWidth + "," + adjustVideoHeight);
         var adjustVideoSize = new cv.Size(window.innerWidth, adjustVideoHeight);
         cv.resize(src, adjustVideoSrc, adjustVideoSize, 0, 0, cv.INTER_AREA);
 
         //1-2 縦揃える
         if (window.innerHeight > adjustVideoSrc.rows) {
             var adjustVideoWidth = parseInt(adjustVideoSrc.cols * (window.innerHeight / adjustVideoSrc.rows));
-            console.log("adjust_video_size 1-2:" + adjustVideoWidth + "," + adjustVideoSrc.rows);
+            //console.log("adjust_video_size 1-2:" + adjustVideoWidth + "," + adjustVideoSrc.rows);
             adjustVideoSize = new cv.Size(adjustVideoWidth, window.innerHeight);
             cv.resize(adjustVideoSrc, adjustVideoSrc2, adjustVideoSize, 0, 0, cv.INTER_AREA);
             //クロップ
@@ -104,7 +104,7 @@ async function processVideo() {
         } else {
 
             //1-2 縦クロップして揃える
-            console.log("adjust_video_size 1-2:" + window.innerWidth + "," + window.innerHeight);
+            //console.log("adjust_video_size 1-2:" + window.innerWidth + "," + window.innerHeight);
             var x1 = parseInt((adjustVideoSrc.cols / 2) - (window.innerWidth / 2));
             var y1 = parseInt((adjustVideoSrc.rows / 2) - (window.innerHeight / 2));
             let rect = new cv.Rect(x1, y1, window.innerWidth, window.innerHeight);
@@ -114,14 +114,14 @@ async function processVideo() {
     } else if (window.innerHeight > video.videoHeight) {
         //2-1 縦揃える
         var adjustVideoWidth = parseInt(video.videoWidth * (window.innerHeight / video.videoHeight));
-        console.log("adjust_video_size 2-1:" + adjustVideoWidth + "," + window.innerHeight);
+        //console.log("adjust_video_size 2-1:" + adjustVideoWidth + "," + window.innerHeight);
         var adjustVideoSize = new cv.Size(adjustVideoWidth, window.innerHeight);
         cv.resize(src, adjustVideoSrc, adjustVideoSize, 0, 0, cv.INTER_AREA);
 
         //2-2 横揃える
         if (window.innerWidth > adjustVideoSrc.cols) {
             var adjustVideoHeight = parseInt(adjustVideoSrc.rows * (window.innerWidth / adjustVideoSrc.cols));
-            console.log("adjust_video_size 2-2:" + window.innerWidth + "," + adjustVideoHeight);
+            //console.log("adjust_video_size 2-2:" + window.innerWidth + "," + adjustVideoHeight);
             adjustVideoSize = new cv.Size(window.innerWidth, adjustVideoHeight);
             cv.resize(adjustVideoSrc, adjustVideoSrc2, adjustVideoSize, 0, 0, cv.INTER_AREA);
             //クロップ
@@ -133,7 +133,7 @@ async function processVideo() {
         } else {
 
             //2−2 横クロップして揃える
-            console.log("adjust_video_size 2-2:" + window.innerWidth + "," + window.innerHeight);
+            //console.log("adjust_video_size 2-2:" + window.innerWidth + "," + window.innerHeight);
             var x1 = parseInt((adjustVideoSrc.cols / 2) - (window.innerWidth / 2));
             var y1 = parseInt((adjustVideoSrc.rows / 2) - (window.innerHeight / 2));
             let rect = new cv.Rect(x1, y1, window.innerWidth, window.innerHeight);
@@ -142,7 +142,7 @@ async function processVideo() {
         }
     } else {
         //3 中心をクロップして揃える
-        console.log("adjust_video_size 3:" + window.innerWidth + "," + window.innerHeight);
+        //console.log("adjust_video_size 3:" + window.innerWidth + "," + window.innerHeight);
         var x1 = parseInt((video.videoWidth / 2) - (window.innerWidth / 2));
         var y1 = parseInt((video.videoHeight / 2) - (window.innerHeight / 2));
         let rect = new cv.Rect(x1, y1, window.innerWidth, window.innerHeight);
@@ -324,19 +324,20 @@ function processARTryOn() {
     //3Dモデルをロード。今回はglTF形式を使用  
     const loader = new THREE.GLTFLoader();
 
-    /*
+    
     //腕時計(loadに時間かかるので初期値null)
     var model_HandWatch = null;
     loader.load('./obj/Hand_watch.glb', 
       function (gltf) {
         model_HandWatch = gltf.scene; // THREE.Group
         model_HandWatch.name = "HandWatch"
-        model_HandWatch.visible = false;
-        model_HandWatch.scale.set(2.0, 2.0, 2.0);
+        model_HandWatch.visible = true;
+        model_HandWatch.scale.set(0.8, 0.8, 0.8);
         model_HandWatch.position.set(0.0, 0.0, 0.0);
-        //model_HandWatch.rotation.x = 0.0;
-        //model_HandWatch.rotation.y = -1.5;
-        //model_HandWatch.rotation.z = 0.0;
+        model_HandWatch.rotation.x = 0.0;
+        model_HandWatch.rotation.y = -1.5;
+        model_HandWatch.rotation.z = 0.0;
+        model_HandWatch.view = null;
         scene.add(model_HandWatch);
       },
       // called while loading is progressing
@@ -351,15 +352,15 @@ function processARTryOn() {
     
     //腕時計オクルージョン用の円柱追加 colorWrite=falseで色情報無くして深度情報のみ描画できる
     var watch_cylinder = new THREE.Mesh(                                     
-      new THREE.CylinderGeometry(0.348,0.348,1.0,50),                         
+      new THREE.CylinderGeometry(0.08, 0.08, 0.5, 50),                         
       new THREE.MeshPhongMaterial({color: 0x00FF00, opacity: 1.0, transparent: false, colorWrite: false})
     );
     watch_cylinder.position.set(0, 0.5, -0.15); //(x,y,z)
     watch_cylinder.rotation.z = 1.57
     //sceneオブジェクトに追加
-    scene.add(watch_cylinder);
-    */
-
+    //scene.add(watch_cylinder);
+    
+    /*
     //指輪(loadに時間かかるので初期値null)
     var model_Ring = null;
     loader.load('./obj/ring.glb',
@@ -392,25 +393,26 @@ function processARTryOn() {
     ring_cylinder.position.set(0, 0, 0); //(x,y,z)
     //sceneオブジェクトに追加
     scene.add(ring_cylinder);
+    */
 
-    //指輪オクルージョン 中指用円柱追加
+    //オクルージョン 中指用円柱追加
     var middle_cylinder = new THREE.Mesh(
         new THREE.CylinderGeometry(0.07, 0.07, 0.3, 50),
         new THREE.MeshPhongMaterial({ color: 0xFF00FF, opacity: 1.0, transparent: false, colorWrite: false })
     );
     middle_cylinder.position.set(-0.1, 0, 0); //(x,y,z)
     //sceneオブジェクトに追加
-    scene.add(middle_cylinder);
+    //scene.add(middle_cylinder);
 
-    //指輪オクルージョン 小指用円柱追加
+    //オクルージョン 小指用円柱追加
     var pinky_cylinder = new THREE.Mesh(
         new THREE.CylinderGeometry(0.08, 0.08, 0.5, 50),
         new THREE.MeshPhongMaterial({ color: 0xFFFF00, opacity: 1.0, transparent: false, colorWrite: false })
     );
     pinky_cylinder.position.set(0.1, 0, 0); //(x,y,z)
     //sceneオブジェクトに追加
-    scene.add(pinky_cylinder);
-
+    //scene.add(pinky_cylinder);
+    
 
     // renderer
     var renderer = new THREE.WebGLRenderer({
@@ -466,10 +468,16 @@ function processARTryOn() {
         //calcTextureOffset(texture);
 
         //AR腕時計試着
-        //renderHandWatch(model_HandWatch, watch_cylinder, detectWatchArea, texture, detectWatchArea_flag);
+        renderHandWatch(model_HandWatch, watch_cylinder, detectWatchArea, detectWatchArea_flag);
+        if(model_HandWatch!=null){
+            //model_HandWatch.position.set(0.0, 0.0, 0.0);
+            //model_HandWatch.rotation.x = 0.0;
+            //model_HandWatch.rotation.y = -1.5;
+            //model_HandWatch.rotation.z = 0.0;
+        }
         
         //AR指輪試着
-        renderRing(model_Ring, ring_cylinder, detectRingArea, detectRingArea_flag);
+        //renderRing(model_Ring, ring_cylinder, detectRingArea, detectRingArea_flag);
         //if(model_Ring!=null)model_Ring.position.set(0.0, 0.0, 0.0);
         //手首の回転に応じて深さ変更。中指と小指のmodel_info.zの大きさに応じて円柱のposition.zを微修正
         if (detectMiddleFingerArea != null && detectPinkyFingerArea != null) {
@@ -496,22 +504,53 @@ function processARTryOn() {
         requestAnimationFrame(render);
     }
 
-    function renderHandWatch(model, cylinder, model_info, texture, flag) {
+    function renderHandWatch(model, cylinder, model_info, flag) {
+        //手をグーにしてもらった状態で表示サイズや回転できるよう考慮する(手を開くとサイズ大きくなる)
+
+
+        // パラメータチューニング用変数
+        var defaultModelScale = 0.8;
+        var scaling_rate = 150;
+        var fixModelPositionRate_x = 0.5;
+        var fixModelPositionRate_y = 1.0;
+        var fixAngle = 40;
+        var fixRotation = 0.0172;
+
+        //モデル保有情報
+        //model.name
+        //model.visible
+        //model.view
+
         if (model != null) {
             //console.log(model);
-            //console.log(flag);
+            //console.log(model_info);
             if (flag == true) {
-                //スクリーン座標逆変換
-                let detectWatchArea_sx = model_info.x;
-                let detectWatchArea_sy = model_info.y;
-                let project_x = (detectWatchArea_sx * 2 / width) - 1.0 - texture.offset.x;
-                let project_y = -(detectWatchArea_sy * 2 / height) + 1.0 + texture.offset.y;
-                //console.log(project_x);
-                //console.log(project_y);
+                // 1.指の検出領域(各関節点の直線の長さ)に合わせて３Dモデルの拡大縮小
+                // 各関節点の直線の長さ = 93.396でringのscale:0.01
+                var scaling = model_info.distance / scaling_rate;
+                //console.log("model scaling:" + scaling);
+                model.scale.set(defaultModelScale * scaling, defaultModelScale * scaling, defaultModelScale * scaling);
 
-                //console.log("angle:" + detectWatchArea.angle);
+                // 2.指の座標を3D空間座標に変換 0:-0.4,196.5:0.0,392:0.4
+                // 左右のpositionが−1~1じゃない場合にパラメータ調整必要。現状はpixel3aに最適化
+                console.log("finger_pos:[", + model_info.x + "," + model_info.y + "]");
+                var finger3Dx = (model_info.x * 2 / window.innerWidth) - 1.0;
+                var finger3Dy = -(model_info.y * 2 / window.innerHeight) + 1.0;
+                //console.log("finger3Dpos:[", + finger3Dx + "," + finger3Dy + "]");
+                //移動座標をパラメータ調整
+                finger3Dx = (finger3Dx * fixModelPositionRate_x) + 0.2;
+                finger3Dy = (finger3Dy * fixModelPositionRate_y) + 0.2;
+                console.log("fix_finger3Dpos:[", + finger3Dx + "," + finger3Dy + "]");
 
-                var radians = THREE.Math.degToRad(40 + model_info.angle);
+                // 3.指輪を指の検出座標に移動
+                model.position.set(finger3Dx, finger3Dy, 0.0);
+                //console.log("angle:" + model_info.angle);
+                //console.log("distance:" + model_info.distance);
+
+                // 4.手首の回転軸に応じて指輪の軸を回転
+                var radians = THREE.Math.degToRad(model_info.angle + fixAngle);
+                //console.log("angle:" + radians);
+
                 var axis = new THREE.Vector3(-1, -1, -1);
                 var rotWorldMatrix = new THREE.Matrix4();
                 rotWorldMatrix.makeRotationAxis(axis.normalize(), radians);
@@ -519,32 +558,57 @@ function processARTryOn() {
                 model.matrix = rotWorldMatrix;
                 model.quaternion.setFromAxisAngle(axis, radians);
 
-                //console.log(THREE.Math.degToRad(detectRingArea.w));
-                model.rotation.x += 0.1;
-                model.rotation.y += 0.1;
-                model.rotation.z = THREE.Math.degToRad(model_info.w);
+                // 5.指の回転角度に応じて指輪回転
+                //指輪の認識復帰時に表裏状態設定(指輪正面-180度、後ろ0度、可動範囲-180~180度)
+                if (model.view == null && Math.abs(model_info.w) >= 0.5 && Math.abs(model_info.w) <= 60) {
+                    model.view = 'rear';
+                } else if (model.view == null && Math.abs(model_info.w) >= 120 && Math.abs(model_info.w) <= 180) {
+                    model.view = 'front';
+                }
+                //console.log("Ring_status:" + model.view);
+                //console.log("hand_w:" + model_info.w);
 
-                //console.log("rot_x:" + model_HandWatch.rotation.x);
-                //console.log("rot_y:" + model_HandWatch.rotation.y);
-                //console.log("rot_z:" + model_HandWatch.rotation.z);
+                //rear時はfrontにさせない
+                if (model.view == 'rear') {
+                    if (Math.abs(model_info.w) >= 0 && Math.abs(model_info.w) <= 60) {
+                        //model.rotation.z = THREE.Math.degToRad(model_info.w);
+                    } else {
+                        //model.rotation.z = -1.5;
+                    }
+                }
+                //front時はrearにさせない
+                if (model.view == 'front') {
+                    if (Math.abs(model_info.w) >= 70 && Math.abs(model_info.w) <= 180) {
+                        //model.rotation.z = THREE.Math.degToRad(model_info.w);
+                    } else {
+                        //model.rotation.z = -1.5;
+                    }
+                }
+                //console.log("rotated_ring_z:" + model.rotation.z);
 
-                model.position.set(project_x, project_y, 0.0);
 
-                //手首の位置変更に合わせてオクルージョン用の円柱も位置変更
-                cylinder.position.set(project_x, project_y, -0.15);
-                cylinder.quaternion.setFromAxisAngle(axis, radians);
-                cylinder.quaternion.multiply(cylinder.quaternion.setFromAxisAngle(axis, radians));
-                cylinder.rotation.z = 1.57
+                //console.log("model_Ring scale:" + model.scale.x);
 
-                //手の平の抽出角度に応じて3Dモデル回転
-                //console.log(THREE.Math.degToRad(detectWatchArea.angle));
-                //model_HandWatch.rotation.y = THREE.Math.degToRad(detectWatchArea.angle);
+                // 6.指輪の位置変更に合わせてオクルージョン用の円柱もサイズ、位置変更
+                //パラメータ：90:0, 180:1.55→155/90 = 1.72
+                //cylinder.scale.set(scaling, scaling, scaling);
+                //cylinder.position.set(finger3Dx, finger3Dy, 0.0);
+                //cylinder.rotation.set(0, 0, (90 - model_info.angle) * fixRotation);
+                //console.log(cylinder.rotation.z);
 
-                // ToDo:スマホのセンサ情報用いてスマホの傾きに応じて3Dモデルの奥行きの角度調整
+                //モデルロード時にデフォルトで腕時計の軸を横回転させる必要があり、その調整
+                var axis = new THREE.Vector3(1, 0, 0); // 回転軸
+                var rad = Math.PI / 2; // ラジアン90°
+                var target = new THREE.Quaternion();
+                // 指定した軸に対して回転を加える
+                target.setFromAxisAngle(axis, 180);
+                model_HandWatch.quaternion.multiply(target);
 
-                model_HandWatch.visible = true;
+                model.visible = true;
             } else if (flag == false) {
-                model.visible = false;
+                //model.visible = false;
+                //指輪のロスト時、表裏状態を初期化
+                model.view = null;
             }
         }
     }

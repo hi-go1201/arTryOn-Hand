@@ -556,6 +556,7 @@ function processARTryOn() {
                     default:
                         fixAngle = 0;
                 }
+                console.log("phi:" + model_info.angle + ", angle:" + fixAngle);
                 //上向きベクトルを生成
                 var axis = new THREE.Vector3(); //←---------------------------------（１）
                 var theta = THREE.Math.degToRad(90);　//正面向くように−90固定?

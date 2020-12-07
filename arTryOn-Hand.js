@@ -267,8 +267,8 @@ function detectHandWatchPos(annotations) {
     var angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
 
     //2.distanceを一定間隔伸ばし、その先の手首座標
-    var target_x = x1 + (distance * 0.5) * Math.cos(radian);
-    var target_y = y1 + (distance * 0.5) * Math.sin(radian);
+    var target_x = x2 + (distance * 0.5) * Math.cos(radian);
+    var target_y = y2 + (distance * 0.5) * Math.sin(radian);
     //console.log("HandWatch_x:" + target_x + ", HandWatch_y:" + target_y + ", HandWatch_distance:" + distance + ", HandWatch_angle:" + angle);
     return { x: target_x, y: target_y, angle: angle, distance: distance };
 }

@@ -267,8 +267,8 @@ function detectHandWatchPos(annotations) {
     var angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
 
     //2.distanceを一定間隔伸ばし、その先の手首座標
-    var target_x = x1 + (distance + 100) * Math.cos(radian);
-    var target_y = y1 + (distance + 100) * Math.sin(radian);
+    var target_x = x1 + (distance * 1.5) * Math.cos(radian);
+    var target_y = y1 + (distance * 1.5) * Math.sin(radian);
     //console.log("HandWatch_x:" + target_x + ", HandWatch_y:" + target_y + ", HandWatch_distance:" + distance + ", HandWatch_angle:" + angle);
     return { x: target_x, y: target_y, angle: angle, distance: distance };
 }
@@ -601,7 +601,7 @@ function processARTryOn() {
                 // 3.指輪を指の検出座標に移動
                 model.position.set(finger3Dx, finger3Dy, 0.0);
                 //console.log("angle:" + model_info.angle);
-                //console.log("distance:" + model_info.distance);
+                console.log("distance:" + model_info.distance);
 
                 // 4.手首の回転軸に応じて指輪の軸を回転
                 var radians = THREE.Math.degToRad(model_info.angle + fixAngle);

@@ -545,21 +545,20 @@ function processARTryOn() {
 
                 //手首の傾きに応じて腕時計の軸回転
                 var alpha = 1;
-                switch (model_info.angle){
+                switch (true){
                     case model_info.angle > 90:
                         alpha = -1;
-                        fixAngle = -45;
+                        fixAngle = 0;
                         //fixModelPositionRate_x = -0.2;
                         break;
                     case model_info.angle < 0:
                         alpha = -1;
-                        fixAngle = 45;
+                        fixAngle = 0;
                         //fixModelPositionRate_x = 0.2;
                         break;
                     default:
                         fixAngle = 0;
                 }
-                console.log("phi:" + model_info.angle + ", angle:" + fixAngle);
                 //上向きベクトルを生成
                 var axis = new THREE.Vector3(); //←---------------------------------（１）
                 var theta = THREE.Math.degToRad(-90 * alpha);　//正面向くように−90固定?
@@ -569,6 +568,7 @@ function processARTryOn() {
                 axis.x = Math.sin(theta) * Math.cos(phi);
                 axis.y = Math.sin(theta) * Math.sin(phi);
 
+                console.log("theta:" + theta +", phi:" + model_info.angle + ", angle:" + fixAngle);
                 //箱オブジェクトの上向きを指定
                 model.lookAt(axis);//←----------回転行列とクォータニオンが更新される（２）
                 //上向きベクトルを回転軸としてangle[rad]回転するクォータニオンを生成

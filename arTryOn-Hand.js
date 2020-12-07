@@ -547,11 +547,11 @@ function processARTryOn() {
                 switch (model_info.angle){
                     case 180:
                         fixAngle = -45;
-                        fixModelPositionRate_x = -0.2;
+                        //fixModelPositionRate_x = -0.2;
                         break;
                     case 90:
                         fixAngle = 45;
-                        fixModelPositionRate_x = 0.2;
+                        //fixModelPositionRate_x = 0.2;
                         break;
                     default:
                         fixAngle = 0;
@@ -559,8 +559,8 @@ function processARTryOn() {
                 console.log("phi:" + model_info.angle + ", angle:" + fixAngle);
                 //上向きベクトルを生成
                 var axis = new THREE.Vector3(); //←---------------------------------（１）
-                var theta = THREE.Math.degToRad(90);　//正面向くように−90固定?
-                var phi = THREE.Math.degToRad(-model_info.angle); //手首の角度
+                var theta = THREE.Math.degToRad(-90);　//正面向くように−90固定?
+                var phi = THREE.Math.degToRad(-model_info.angle + 90); //手首の角度
                 var angle = THREE.Math.degToRad(fixAngle); //手首の回転
                 axis.z = Math.cos(theta);
                 axis.x = Math.sin(theta) * Math.cos(phi);

@@ -558,7 +558,7 @@ function processARTryOn() {
                 }
                 //上向きベクトルを生成
                 var axis = new THREE.Vector3(); //←---------------------------------（１）
-                var theta = THREE.Math.degToRad(-90);　//正面向くように−90固定?
+                var theta = THREE.Math.degToRad(90);　//正面向くように−90固定?
                 var phi = THREE.Math.degToRad(model_info.angle); //手首の角度
                 var angle = THREE.Math.degToRad(fixAngle); //手首の回転
                 axis.z = Math.cos(theta);
@@ -593,7 +593,7 @@ function processARTryOn() {
                 console.log("fix_finger3Dpos:[", + finger3Dx + "," + finger3Dy + "]");
 
                 // 3.指輪を指の検出座標に移動
-                //model.position.set(finger3Dx, finger3Dy, 0.0);
+                model.position.set(finger3Dx, finger3Dy, 0.0);
                 //console.log("angle:" + model_info.angle);
                 //console.log("distance:" + model_info.distance);
 

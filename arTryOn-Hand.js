@@ -512,8 +512,8 @@ function processARTryOn() {
         // パラメータチューニング用変数
         var defaultModelScale = 0.8;
         var scaling_rate = 150;
-        var fixModelPositionRate_x = -0.1;
-        var fixModelPositionRate_y = -0.2;
+        var fixModelPositionRate_x = 0.0;
+        var fixModelPositionRate_y = 0.0;
         var fixAngle = 40;
         var fixRotation = 0.0172;
 

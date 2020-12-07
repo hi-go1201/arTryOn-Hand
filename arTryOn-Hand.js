@@ -324,42 +324,43 @@ function processARTryOn() {
     //3Dモデルをロード。今回はglTF形式を使用  
     const loader = new THREE.GLTFLoader();
 
-    
+
     //腕時計(loadに時間かかるので初期値null)
     var model_HandWatch = null;
-    loader.load('./obj/Hand_watch.glb', 
-      function (gltf) {
-        model_HandWatch = gltf.scene; // THREE.Group
-        model_HandWatch.name = "HandWatch"
-        model_HandWatch.visible = true;
-        model_HandWatch.scale.set(0.8, 0.8, 0.8);
-        model_HandWatch.position.set(0.0, 0.0, 0.0);
-        model_HandWatch.rotation.x = 0.0;
-        model_HandWatch.rotation.y = -1.5;
-        model_HandWatch.rotation.z = 0.0;
-        model_HandWatch.view = null;
-        scene.add(model_HandWatch);
-      },
-      // called while loading is progressing
-      function (xhr) {
-        console.log('HandWatch: ' + (xhr.loaded / xhr.total * 100) + '% loaded');
-      },
-      // called when loading has errors
-      function (error) {
-        console.log('An error happened');
-      }
+    loader.load('./obj/Hand_watch.glb',
+        function (gltf) {
+            model_HandWatch = gltf.scene; // THREE.Group
+            model_HandWatch.name = "HandWatch"
+            model_HandWatch.visible = true;
+            model_HandWatch.scale.set(0.8, 0.8, 0.8);
+            model_HandWatch.position.set(0.0, 0.0, 0.0);
+            model_HandWatch.rotation.x = 0.0;
+            model_HandWatch.rotation.y = 0.0;
+            model_HandWatch.rotation.z = 0.0;
+            model_HandWatch.view = null;
+            model_HandWatch.init = false;
+            scene.add(model_HandWatch);
+        },
+        // called while loading is progressing
+        function (xhr) {
+            console.log('HandWatch: ' + (xhr.loaded / xhr.total * 100) + '% loaded');
+        },
+        // called when loading has errors
+        function (error) {
+            console.log('An error happened');
+        }
     );
-    
+
     //腕時計オクルージョン用の円柱追加 colorWrite=falseで色情報無くして深度情報のみ描画できる
-    var watch_cylinder = new THREE.Mesh(                                     
-      new THREE.CylinderGeometry(0.08, 0.08, 0.5, 50),                         
-      new THREE.MeshPhongMaterial({color: 0x00FF00, opacity: 1.0, transparent: false, colorWrite: false})
+    var watch_cylinder = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.08, 0.08, 0.5, 50),
+        new THREE.MeshPhongMaterial({ color: 0x00FF00, opacity: 1.0, transparent: false, colorWrite: false })
     );
     watch_cylinder.position.set(0, 0.5, -0.15); //(x,y,z)
     watch_cylinder.rotation.z = 1.57
     //sceneオブジェクトに追加
     //scene.add(watch_cylinder);
-    
+
     /*
     //指輪(loadに時間かかるので初期値null)
     var model_Ring = null;
@@ -412,7 +413,7 @@ function processARTryOn() {
     pinky_cylinder.position.set(0.1, 0, 0); //(x,y,z)
     //sceneオブジェクトに追加
     //scene.add(pinky_cylinder);
-    
+
 
     // renderer
     var renderer = new THREE.WebGLRenderer({
@@ -469,13 +470,13 @@ function processARTryOn() {
 
         //AR腕時計試着
         renderHandWatch(model_HandWatch, watch_cylinder, detectWatchArea, detectWatchArea_flag);
-        if(model_HandWatch!=null){
+        if (model_HandWatch != null) {
             //model_HandWatch.position.set(0.0, 0.0, 0.0);
             //model_HandWatch.rotation.x = 0.0;
             //model_HandWatch.rotation.y = -1.5;
             //model_HandWatch.rotation.z = 0.0;
         }
-        
+
         //AR指輪試着
         //renderRing(model_Ring, ring_cylinder, detectRingArea, detectRingArea_flag);
         //if(model_Ring!=null)model_Ring.position.set(0.0, 0.0, 0.0);
@@ -512,7 +513,7 @@ function processARTryOn() {
         var defaultModelScale = 0.8;
         var scaling_rate = 150;
         var fixModelPositionRate_x = 0.5;
-        var fixModelPositionRate_y = 1.0;
+        var fixModelPositionRate_y = 0.0;
         var fixAngle = 40;
         var fixRotation = 0.0172;
 
@@ -524,12 +525,61 @@ function processARTryOn() {
         if (model != null) {
             //console.log(model);
             //console.log(model_info);
+            //モデルロード時にデフォルトで腕時計の軸を横回転させる必要があり、その調整
+            var axis = new THREE.Vector3(1, 0, 0); // 回転軸
+            var radians = THREE.Math.degToRad(90);
+            var target = new THREE.Quaternion();
+            if (model.init == false) {
+                // 指定した軸に対して回転を加える
+                //target.setFromAxisAngle(axis, radians);
+                //model.quaternion.multiply(target);
+                model.init = true;
+            }
+
             if (flag == true) {
                 // 1.指の検出領域(各関節点の直線の長さ)に合わせて３Dモデルの拡大縮小
                 // 各関節点の直線の長さ = 93.396でringのscale:0.01
                 var scaling = model_info.distance / scaling_rate;
                 //console.log("model scaling:" + scaling);
-                model.scale.set(defaultModelScale * scaling, defaultModelScale * scaling, defaultModelScale * scaling);
+                //model.scale.set(defaultModelScale * scaling, defaultModelScale * scaling, defaultModelScale * scaling);
+
+                //手首の傾きに応じて腕時計の軸回転
+                switch (model_info.angle){
+                    case 90:
+                        fixAngle = 45;
+                        fixModelPositionRate_x = 0.2;
+                        break;
+                    case -90:
+                        fixAngle = -45;
+                        fixModelPositionRate_x = -0.2;
+                        break;
+                    default:
+                        fixAngle = 0;
+                }
+                //上向きベクトルを生成
+                var axis = new THREE.Vector3(); //←---------------------------------（１）
+                var theta = THREE.Math.degToRad(-90);　//正面向くように−90固定?
+                var phi = THREE.Math.degToRad(model_info.angle); //手首の角度
+                var angle = THREE.Math.degToRad(fixAngle); //手首の回転
+                axis.z = Math.cos(theta);
+                axis.x = Math.sin(theta) * Math.cos(phi);
+                axis.y = Math.sin(theta) * Math.sin(phi);
+
+                //箱オブジェクトの上向きを指定
+                model.lookAt(axis);//←----------回転行列とクォータニオンが更新される（２）
+                //上向きベクトルを回転軸としてangle[rad]回転するクォータニオンを生成
+                q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), angle); //←（３）
+                //箱オブジェクトを回転軸周りで回転
+                model.quaternion.multiply(q); //←-----------------------------------（４）
+
+                //model.rotation.z = 1.5 //phi:90~180なら1.5
+
+                //可動範囲をphi=-90~90に限定する
+                //デフォルトがtheta=-90,phi=90,angle=45+手首の回転,position_x+=0.2
+                //phi=89~0ならtheta=-90,angle=0+手首の回転,position_x+=0.0
+                //phi=0~-89ならtheta=-90,angle=0+手首の回転,position_x+=0.0
+                //phi=-90,theta=-90,angle=-45+手首の回転,position_x-=0.2
+
 
                 // 2.指の座標を3D空間座標に変換 0:-0.4,196.5:0.0,392:0.4
                 // 左右のpositionが−1~1じゃない場合にパラメータ調整必要。現状はpixel3aに最適化
@@ -538,12 +588,12 @@ function processARTryOn() {
                 var finger3Dy = -(model_info.y * 2 / window.innerHeight) + 1.0;
                 //console.log("finger3Dpos:[", + finger3Dx + "," + finger3Dy + "]");
                 //移動座標をパラメータ調整
-                finger3Dx = (finger3Dx * fixModelPositionRate_x) + 0.2;
-                finger3Dy = (finger3Dy * fixModelPositionRate_y) + 0.2;
+                finger3Dx = finger3Dx + fixModelPositionRate_x;
+                finger3Dy = finger3Dy + fixModelPositionRate_y;
                 console.log("fix_finger3Dpos:[", + finger3Dx + "," + finger3Dy + "]");
 
                 // 3.指輪を指の検出座標に移動
-                model.position.set(finger3Dx, finger3Dy, 0.0);
+                //model.position.set(finger3Dx, finger3Dy, 0.0);
                 //console.log("angle:" + model_info.angle);
                 //console.log("distance:" + model_info.distance);
 
@@ -551,12 +601,12 @@ function processARTryOn() {
                 var radians = THREE.Math.degToRad(model_info.angle + fixAngle);
                 //console.log("angle:" + radians);
 
-                var axis = new THREE.Vector3(-1, -1, -1);
-                var rotWorldMatrix = new THREE.Matrix4();
-                rotWorldMatrix.makeRotationAxis(axis.normalize(), radians);
-                rotWorldMatrix.multiply(model.matrix);
-                model.matrix = rotWorldMatrix;
-                model.quaternion.setFromAxisAngle(axis, radians);
+                //var axis = new THREE.Vector3(-1, -1, -1);
+                //var rotWorldMatrix = new THREE.Matrix4();
+                //rotWorldMatrix.makeRotationAxis(axis.normalize(), radians);
+                //rotWorldMatrix.multiply(model.matrix);
+                //model.matrix = rotWorldMatrix;
+                //model.quaternion.setFromAxisAngle(axis, radians);
 
                 // 5.指の回転角度に応じて指輪回転
                 //指輪の認識復帰時に表裏状態設定(指輪正面-180度、後ろ0度、可動範囲-180~180度)
@@ -597,12 +647,37 @@ function processARTryOn() {
                 //console.log(cylinder.rotation.z);
 
                 //モデルロード時にデフォルトで腕時計の軸を横回転させる必要があり、その調整
-                var axis = new THREE.Vector3(1, 0, 0); // 回転軸
-                var rad = Math.PI / 2; // ラジアン90°
-                var target = new THREE.Quaternion();
+                //var axis = new THREE.Vector3(1, 0, 0); // 回転軸
+                //var radians = THREE.Math.degToRad(90);
+                //var target = new THREE.Quaternion();
                 // 指定した軸に対して回転を加える
-                target.setFromAxisAngle(axis, 180);
-                model_HandWatch.quaternion.multiply(target);
+                //target.setFromAxisAngle(axis, radians);
+                //model.quaternion.multiply(target);
+
+                //上向きベクトルを生成
+                var axis = new THREE.Vector3(); //←---------------------------------（１）
+                var theta = THREE.Math.degToRad(0);　//正面向くように−90固定?
+                var phi = THREE.Math.degToRad(0); //手首の角度
+                var angle = THREE.Math.degToRad(0); //手首の回転
+                axis.z = Math.cos(theta);
+                axis.x = Math.sin(theta) * Math.cos(phi);
+                axis.y = Math.sin(theta) * Math.sin(phi);
+
+                //箱オブジェクトの上向きを指定
+                //model.lookAt(axis);//←----------回転行列とクォータニオンが更新される（２）
+                //上向きベクトルを回転軸としてangle[rad]回転するクォータニオンを生成
+                //q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), angle); //←（３）
+                //箱オブジェクトを回転軸周りで回転
+                //model.quaternion.multiply(q); //←-----------------------------------（４）
+
+                //model.rotation.z = 1.5 //phi:90~180なら1.5
+
+                //可動範囲をphi=-90~90に限定する
+                //デフォルトがtheta=-90,phi=90,angle=45+手首の回転,position_x+=0.2
+                //phi=89~0ならtheta=-90,angle=0+手首の回転,position_x+=0.0
+                //phi=0~-89ならtheta=-90,angle=0+手首の回転,position_x+=0.0
+                //phi=-90,theta=-90,angle=-45+手首の回転,position_x-=0.2
+                //angle
 
                 model.visible = true;
             } else if (flag == false) {
@@ -747,7 +822,7 @@ function processARTryOn() {
     }
 
     // 精度改善フェーズで使う機能かも
-    function calcTextureOffset(texture){
+    function calcTextureOffset(texture) {
         // Set the repeat and offset properties of the background texture
         // to keep the image's aspect correct.
         // Note the image may not have loaded yet.

@@ -544,12 +544,15 @@ function processARTryOn() {
                 //model.scale.set(defaultModelScale * scaling, defaultModelScale * scaling, defaultModelScale * scaling);
 
                 //手首の傾きに応じて腕時計の軸回転
+                var alpha = 1;
                 switch (model_info.angle){
-                    case 180:
+                    case model_info.angle > 90:
+                        alpha = -1;
                         fixAngle = -45;
                         //fixModelPositionRate_x = -0.2;
                         break;
-                    case 90:
+                    case model_info.angle < 0:
+                        alpha = -1;
                         fixAngle = 45;
                         //fixModelPositionRate_x = 0.2;
                         break;
@@ -559,7 +562,7 @@ function processARTryOn() {
                 console.log("phi:" + model_info.angle + ", angle:" + fixAngle);
                 //上向きベクトルを生成
                 var axis = new THREE.Vector3(); //←---------------------------------（１）
-                var theta = THREE.Math.degToRad(-90);　//正面向くように−90固定?
+                var theta = THREE.Math.degToRad(-90 * alpha);　//正面向くように−90固定?
                 var phi = THREE.Math.degToRad(model_info.angle); //手首の角度
                 var angle = THREE.Math.degToRad(fixAngle); //手首の回転
                 axis.z = Math.cos(theta);
@@ -575,11 +578,11 @@ function processARTryOn() {
 
                 //model.rotation.z = 1.5 //phi:90~180なら1.5
 
-                //可動範囲をphi=-90~90に限定する
-                //デフォルトがtheta=-90,phi=90,angle=45+手首の回転,position_x+=0.2
-                //phi=89~0ならtheta=-90,angle=0+手首の回転,position_x+=0.0
-                //phi=0~-89ならtheta=-90,angle=0+手首の回転,position_x+=0.0
-                //phi=-90,theta=-90,angle=-45+手首の回転,position_x-=0.2
+                //可動範囲をphi=0~180に限定する
+                //デフォルトがphi=90,theta=-90,angle=45+手首の回転,position_x+=0.0
+                //phi=0~89ならtheta=-90,angle=0+手首の回転,position_x+=0.0
+                //phi=91~179,theta=90,angle=-0+手首の回転,position_x-=0.0
+                //phi=180,-180~,theta=90,angle=-0+手首の回転,position_x-=0.0
 
 
                 // 2.指の座標を3D空間座標に変換 0:-0.4,196.5:0.0,392:0.4

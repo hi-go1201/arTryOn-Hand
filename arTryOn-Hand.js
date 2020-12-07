@@ -512,8 +512,8 @@ function processARTryOn() {
         // パラメータチューニング用変数
         var defaultModelScale = 0.8;
         var scaling_rate = 150;
-        var fixModelPositionRate_x = 0.5;
-        var fixModelPositionRate_y = 0.0;
+        var fixModelPositionRate_x = -0.2;
+        var fixModelPositionRate_y = -0.2;
         var fixAngle = 40;
         var fixRotation = 0.0172;
 
@@ -545,9 +545,11 @@ function processARTryOn() {
 
                 //手首の傾きに応じて腕時計の軸回転
                 var alpha = 1;
+                var beta = 1;
                 switch (true){
                     case model_info.angle > 90:
                         alpha = -1;
+                        beta = -1;
                         fixAngle = 0;
                         //fixModelPositionRate_x = -0.2;
                         break;
@@ -562,7 +564,7 @@ function processARTryOn() {
                 //上向きベクトルを生成
                 var axis = new THREE.Vector3(); //←---------------------------------（１）
                 var theta = THREE.Math.degToRad(-90 * alpha);　//正面向くように−90固定?
-                var phi = THREE.Math.degToRad(model_info.angle * alpha); //手首の角度
+                var phi = THREE.Math.degToRad(model_info.angle * beta); //手首の角度
                 var angle = THREE.Math.degToRad(fixAngle); //手首の回転
                 axis.z = Math.cos(theta);
                 axis.x = Math.sin(theta) * Math.cos(phi);

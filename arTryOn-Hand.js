@@ -546,12 +546,12 @@ function processARTryOn() {
                 //手首の傾きに応じて腕時計の軸回転
                 switch (model_info.angle){
                     case 90:
-                        fixAngle = 45;
-                        fixModelPositionRate_x = 0.2;
-                        break;
-                    case -90:
                         fixAngle = -45;
                         fixModelPositionRate_x = -0.2;
+                        break;
+                    case -90:
+                        fixAngle = 45;
+                        fixModelPositionRate_x = 0.2;
                         break;
                     default:
                         fixAngle = 0;

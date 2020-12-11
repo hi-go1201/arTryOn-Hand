@@ -227,7 +227,7 @@ async function detectHandPose() {
 //2本の指の各関節位置を基準に指の平均回転角度w算出
 function calcHandRotate(finger1, finger2) {
     //パラメータチューニング用変数
-    var alpha = 1.0;
+    var alpha = 2.0;
 
     //人差し指
     var finger1_x0 = finger1[0][0];
@@ -560,7 +560,7 @@ function processARTryOn() {
                 //w=-1~-90で上向き回転、1~90で下向き回転
                 //fix_w:1~90で上向き回転、-1~-90で下向き回転
                 console.log("hand_w:" + model_info.w);
-                var fix_w = (model_info.w + 15) * -1;
+                var fix_w = model_info.w * -1;
                 if(model_info.w > 0){
                     //fix_w =  model_info.w - 180;
                 }else{

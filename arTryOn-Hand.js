@@ -35,6 +35,7 @@ function startCamera() {
         audio: false,
         video: {
             facingMode: "environment",
+            zoom: true,
             width: { min: 800, ideal: 1280, max: 1920 },
             height: { min: 600, ideal: 720, max: 1080 }
         }
@@ -44,6 +45,11 @@ function startCamera() {
             video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
             video.setAttribute("autoplay", true);
             video.setAttribute("muted", true);
+            const [track] = stream.getVideoTracks();
+            const capabilities = track.getCapabilities();
+            const settings = track.getSettings();
+            console.log(capabilities);
+            console.log(settings);
             video.play();
         })
         .catch(function (err) {
@@ -554,7 +560,7 @@ function processARTryOn() {
                 //w=-1~-90で上向き回転、1~90で下向き回転
                 //fix_w:1~90で上向き回転、-1~-90で下向き回転
                 console.log("hand_w:" + model_info.w);
-                var fix_w = model_info.w * -1;
+                var fix_w = (model_info.w + 15) * -1;
                 if(model_info.w > 0){
                     //fix_w =  model_info.w - 180;
                 }else{
@@ -598,7 +604,7 @@ function processARTryOn() {
                 //console.log("finger3Dpos:[", + finger3Dx + "," + finger3Dy + "]");
                 //移動座標をパラメータ調整
                 finger3Dx = finger3Dx + fixModelPositionRate_x;
-                finger3Dy = finger3Dy + fixModelPositionRate_y;
+                finger3Dy = finger3Dy + fixModelPositionRate_y - 0.2;
                 //console.log("fix_finger3Dpos:[", + finger3Dx + "," + finger3Dy + "]");
 
                 // 4.腕時計を手首の検出座標に移動

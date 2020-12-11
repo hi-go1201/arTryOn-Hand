@@ -25,7 +25,7 @@
       overflow: hidden;
     }
 
-    .btn-flat-simple {
+    .select {
       position: absolute;
       left: 50%;
       margin: auto;
@@ -44,14 +44,13 @@
 
 <body>
   <div id="main">
-    <select class="btn-flat-simple" id="arTryOnSelect">
+    <select class="select" id="arTryOnSelect">
       <option value="ring" selected>指輪(右手薬指)</option>
       <option value="handwatch">腕時計(左手)</option>
     </select>
     <video id="video" style="display: none;"></video>
     <canvas id="canvas" style="display: none;"></canvas>
   </div>
-  <!--script src="./occlusionTest.js" onload="addWebGL();"></script-->
   <script src="./arTryOn-Hand.js"></script>
   <script async src="./opencv.js" onload="opencvIsReady()" type="text/javascript"></script>
 </body>

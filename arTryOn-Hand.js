@@ -23,7 +23,7 @@ let fingerLookupIndices = {
     pinky: [0, 17, 18, 19, 20]
 };  // for rendering each finger as a polyline
 
-//AR Try On Select
+// AR Try On Select
 let arTryOnSelect = "ring";
 
 function opencvIsReady() {
@@ -48,6 +48,7 @@ function startCamera() {
             video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
             video.setAttribute("autoplay", true);
             video.setAttribute("muted", true);
+            // camera ズーム付けたいがsafari非対応のため未対応
             const [track] = stream.getVideoTracks();
             const capabilities = track.getCapabilities();
             const settings = track.getSettings();
@@ -258,7 +259,7 @@ function calcHandRotate(finger1, finger2) {
     var w_3 = Math.atan2(finger1_z3 - finger2_z3, finger1_x3 - finger2_x3) * (180 / Math.PI);
 
     var avg_w = (w_0 + w_1 + w_2 + w_3) / 4;
-    //wの増減量が少なそうなのでalpha倍にする
+    //wの増減量が少なければalpha倍にする
     var fix_w = avg_w * alpha;
     //console.log("avg_w:" + avg_w + ", fix_w:" + fix_w);
     return fix_w;
@@ -330,9 +331,8 @@ function processARTryOn() {
     lightDir.position.set(1, 1, 1);
     scene.add(lightDir);
 
-    //3Dモデルをロード。今回はglTF形式を使用  
+    //3Dモデルをロード。今回はglb形式を使用  
     const loader = new THREE.GLTFLoader();
-
 
     //腕時計(loadに時間かかるので初期値null)
     var model_HandWatch = null;
@@ -368,7 +368,6 @@ function processARTryOn() {
     watch_cylinder.rotation.z = 1.57
     //sceneオブジェクトに追加
     scene.add(watch_cylinder);
-
 
     //指輪(loadに時間かかるので初期値null)
     var model_Ring = null;
@@ -523,8 +522,7 @@ function processARTryOn() {
         var defaultModelScale = 0.8;
         var scaling_rate = 145;
         var fixModelPositionRate_x = 0.0;
-        var fixModelPositionRate_y = 0.0;
-        var fixAngle = 40;
+        var fixModelPositionRate_y = -0.2;
         var fixRotation = 0.0172;
 
         //モデル保有情報
@@ -545,40 +543,25 @@ function processARTryOn() {
                 // 2.手首の傾きに応じて腕時計の軸回転
                 var alpha = 1;
                 var beta = 1;
-                switch (true) {
-                    case model_info.angle > 90:
-                        alpha = -1;
-                        beta = -1;
-                        fixAngle = 0;
-                        //fixModelPositionRate_x = -0.2;
-                        break;
-                    case model_info.angle < 0:
-                        alpha = -1;
-                        fixAngle = 0;
-                        //fixModelPositionRate_x = 0.2;
-                        break;
-                    default:
-                        fixAngle = 0;
+                if (model_info > 90) {
+                    alpha = -1;
+                    beta = -1;
+                } else if (model_info.angle < 0) {
+                    alpha = -1;
                 }
 
-                //手首回転調整 理想はw=0度で正面、w:1~90で上向き回転、-1~-90で下向き回転、w=±180で裏
-                //ToDo：スマホでは逆向き、逆回転しているので再確認して調整
-                //w=-1~-90で上向き回転、1~90で下向き回転
+                //手首回転調整 理想はw=0度で正面、w=-1~-90で上向き回転、1~90で下向き回転、w=±180で裏
                 //fix_w:1~90で上向き回転、-1~-90で下向き回転
-                console.log("hand_w:" + model_info.w);
                 var fix_w = model_info.w * -1.1;
-                if (model_info.w > 0) {
-                    //fix_w =  model_info.w - 180;
-                } else {
-                    //fix_w = model_info.w;
-                }
                 //正面と裏のチラつき防止
                 if (fix_w > 100 || fix_w < -100) fix_w = 0;
-                console.log("fix_w:" + fix_w);
+
+                //console.log("hand_w:" + model_info.w);
+                //console.log("fix_w:" + fix_w);
 
                 //上向きベクトルを生成
                 var axis = new THREE.Vector3(); //←---------------------------------（１）
-                var theta = THREE.Math.degToRad(-90 * alpha);　//正面向くように−90固定?
+                var theta = THREE.Math.degToRad(-90 * alpha);　//正面向くように−90固定
                 var phi = THREE.Math.degToRad(model_info.angle * beta); //手首の角度
                 var angle = THREE.Math.degToRad(fix_w); //手首の回転
                 axis.z = Math.cos(theta);
@@ -593,15 +576,6 @@ function processARTryOn() {
                 //オブジェクトを回転軸周りで回転
                 model.quaternion.multiply(q); //←-----------------------------------（４）
 
-                //model.rotation.z = 1.5 //phi:90~180なら1.5
-
-                //可動範囲をphi=0~180に限定する
-                //デフォルトがphi=90,theta=-90,angle=45+手首の回転,position_x+=0.0
-                //phi=0~89ならtheta=-90,angle=0+手首の回転,position_x+=0.0
-                //phi=91~179,theta=90,angle=-0+手首の回転,position_x-=0.0
-                //phi=180,-180~,theta=90,angle=-0+手首の回転,position_x-=0.0
-
-
                 // 3.手首の座標を3D空間座標に変換 0:-0.4,196.5:0.0,392:0.4
                 // 左右のpositionが−1~1じゃない場合にパラメータ調整必要。現状はpixel3aに最適化
                 //console.log("finger_pos:[", + model_info.x + "," + model_info.y + "]");
@@ -610,7 +584,7 @@ function processARTryOn() {
                 //console.log("finger3Dpos:[", + finger3Dx + "," + finger3Dy + "]");
                 //移動座標をパラメータ調整
                 finger3Dx = finger3Dx + fixModelPositionRate_x;
-                finger3Dy = finger3Dy + fixModelPositionRate_y - 0.2;
+                finger3Dy = finger3Dy + fixModelPositionRate_y;
                 //console.log("fix_finger3Dpos:[", + finger3Dx + "," + finger3Dy + "]");
 
                 // 4.腕時計を手首の検出座標に移動
@@ -618,42 +592,10 @@ function processARTryOn() {
                 //console.log("angle:" + model_info.angle);
                 //console.log("distance:" + model_info.distance);
 
-
-                // 5.手首の回転角度に応じて腕時計回転
-                //手首の認識復帰時に表裏状態設定(指輪正面-180度、後ろ0度、可動範囲-180~180度)
-                if (model.view == null && Math.abs(model_info.w) >= 0.5 && Math.abs(model_info.w) <= 60) {
-                    model.view = 'rear';
-                } else if (model.view == null && Math.abs(model_info.w) >= 120 && Math.abs(model_info.w) <= 180) {
-                    model.view = 'front';
-                }
-                //console.log("Ring_status:" + model.view);
-                //console.log("hand_w:" + model_info.w);
-
-                //rear時はfrontにさせない
-                if (model.view == 'rear') {
-                    if (Math.abs(model_info.w) >= 0 && Math.abs(model_info.w) <= 60) {
-                        //model.rotation.z = THREE.Math.degToRad(model_info.w);
-                    } else {
-                        //model.rotation.z = -1.5;
-                    }
-                }
-                //front時はrearにさせない
-                if (model.view == 'front') {
-                    if (Math.abs(model_info.w) >= 70 && Math.abs(model_info.w) <= 180) {
-                        //model.rotation.z = THREE.Math.degToRad(model_info.w);
-                    } else {
-                        //model.rotation.z = -1.5;
-                    }
-                }
-                //console.log("rotated_ring_z:" + model.rotation.z);
-
-
-                //console.log("model_Ring scale:" + model.scale.x);
-
-                // 6.腕時計の位置変更に合わせてオクルージョン用の円柱もサイズ、位置変更
+                // 5.腕時計の位置変更に合わせてオクルージョン用の円柱もサイズ、位置変更
                 //パラメータ：90:0, 180:1.55→155/90 = 1.72
                 cylinder.scale.set(scaling, scaling, scaling);
-                cylinder.position.set(finger3Dx, finger3Dy + 0.2, 0.0);
+                cylinder.position.set(finger3Dx, finger3Dy - fixModelPositionRate_y, 0.0);
                 cylinder.rotation.set(0, 0, (90 - model_info.angle) * fixRotation);
                 //console.log(cylinder.rotation.z);
 
@@ -693,14 +635,14 @@ function processARTryOn() {
 
                 // 2.指の座標を3D空間座標に変換 0:-0.4,196.5:0.0,392:0.4
                 // 左右のpositionが−1~1じゃない場合にパラメータ調整必要。現状はpixel3aに最適化
-                console.log("finger_pos:[", + model_info.x + "," + model_info.y + "]");
+                //console.log("finger_pos:[", + model_info.x + "," + model_info.y + "]");
                 var finger3Dx = (model_info.x * 2 / window.innerWidth) - 1.0;
                 var finger3Dy = -(model_info.y * 2 / window.innerHeight) + 1.0;
                 //console.log("finger3Dpos:[", + finger3Dx + "," + finger3Dy + "]");
                 //移動座標をパラメータ調整
                 finger3Dx = finger3Dx * fixModelPositionRate_x;
                 finger3Dy = finger3Dy * fixModelPositionRate_y;
-                console.log("fix_finger3Dpos:[", + finger3Dx + "," + finger3Dy + "]");
+                //console.log("fix_finger3Dpos:[", + finger3Dx + "," + finger3Dy + "]");
 
                 // 3.指輪を指の検出座標に移動
                 model.position.set(finger3Dx, finger3Dy, 0.0);

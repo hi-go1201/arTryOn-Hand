@@ -358,13 +358,13 @@ function processARTryOn() {
 
     //腕時計オクルージョン用の円柱追加 colorWrite=falseで色情報無くして深度情報のみ描画できる
     var watch_cylinder = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.08, 0.08, 0.5, 50),
+        new THREE.CylinderGeometry(0.1, 0.1, 0.4, 50),
         new THREE.MeshPhongMaterial({ color: 0x00FF00, opacity: 1.0, transparent: false, colorWrite: false })
     );
     watch_cylinder.position.set(0, 0.5, -0.15); //(x,y,z)
     watch_cylinder.rotation.z = 1.57
     //sceneオブジェクトに追加
-    //scene.add(watch_cylinder);
+    scene.add(watch_cylinder);
 
     /*
     //指輪(loadに時間かかるので初期値null)
@@ -646,9 +646,9 @@ function processARTryOn() {
 
                 // 6.腕時計の位置変更に合わせてオクルージョン用の円柱もサイズ、位置変更
                 //パラメータ：90:0, 180:1.55→155/90 = 1.72
-                //cylinder.scale.set(scaling, scaling, scaling);
-                //cylinder.position.set(finger3Dx, finger3Dy, 0.0);
-                //cylinder.rotation.set(0, 0, (90 - model_info.angle) * fixRotation);
+                cylinder.scale.set(scaling, scaling, scaling);
+                cylinder.position.set(finger3Dx, finger3Dy + 0.2, 0.0);
+                cylinder.rotation.set(0, 0, (90 - model_info.angle) * fixRotation);
                 //console.log(cylinder.rotation.z);
 
 

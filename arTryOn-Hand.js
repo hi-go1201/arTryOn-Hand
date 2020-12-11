@@ -515,7 +515,7 @@ function processARTryOn() {
 
         // パラメータチューニング用変数
         var defaultModelScale = 0.8;
-        var scaling_rate = 150;
+        var scaling_rate = 145;
         var fixModelPositionRate_x = 0.0;
         var fixModelPositionRate_y = 0.0;
         var fixAngle = 40;
@@ -567,7 +567,7 @@ function processARTryOn() {
                     //fix_w = model_info.w;
                 }
                 //正面と裏のチラつき防止
-                if(fix_w > 160 || fix_w < -160)fix_w = 180;
+                if(fix_w > 100 || fix_w < -100)fix_w = 0;
                 console.log("fix_w:" + fix_w);
 
                 //上向きベクトルを生成

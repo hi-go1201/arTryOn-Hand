@@ -551,9 +551,10 @@ function processARTryOn() {
 
                 //手首回転調整 理想はw=0度で正面、w:1~90で上向き回転、-1~-90で下向き回転、w=±180で裏
                 //ToDo：スマホでは逆向き、逆回転しているので再確認して調整
-                //w=-1~-90で上向き回転、1~90で下向き回転、
+                //w=-1~-90で上向き回転、1~90で下向き回転
+                //fix_w:1~90で上向き回転、-1~-90で下向き回転
                 console.log("hand_w:" + model_info.w);
-                var fix_w = model_info.w;
+                var fix_w = model_info.w * -1;
                 if(model_info.w > 0){
                     //fix_w =  model_info.w - 180;
                 }else{

@@ -524,13 +524,13 @@ function processARTryOn() {
             //console.log(model);
             //console.log(model_info);
             if (flag == true) {
-                // 1.指の検出領域(各関節点の直線の長さ)に合わせて３Dモデルの拡大縮小
-                // 各関節点の直線の長さ = 93.396でringのscale:0.01
+                // 1.手首の検出領域(各関節点の直線の長さ)に合わせて３Dモデルの拡大縮小
+                // 各関節点の直線の長さ = 93.396で腕時計のscale:0.8
                 var scaling = model_info.distance / scaling_rate;
                 //console.log("model scaling:" + scaling);
                 model.scale.set(defaultModelScale * scaling, defaultModelScale * scaling, defaultModelScale * scaling);
 
-                //手首の傾きに応じて腕時計の軸回転
+                // 2.手首の傾きに応じて腕時計の軸回転
                 var alpha = 1;
                 var beta = 1;
                 switch (true){
@@ -550,6 +550,7 @@ function processARTryOn() {
                 }
 
                 //手首回転調整 理想はw=0度で正面、w:1~90で上向き回転、-1~-90で下向き回転、w=±180で裏
+                //ToDo：スマホでは逆向き、逆回転しているので再確認して調整
                 console.log("hand_w:" + model_info.w);
                 var fix_w = model_info.w;
                 if(model_info.w > 0){
@@ -558,7 +559,7 @@ function processARTryOn() {
                     fix_w = model_info.w;
                 }
                 //正面と裏のチラつき防止
-                if(fix_w > 160 || fix_w < -160)fix_w = 180;
+                //if(fix_w > 160 || fix_w < -160)fix_w = 180;
                 console.log("fix_w:" + fix_w);
 
                 //上向きベクトルを生成
@@ -571,11 +572,11 @@ function processARTryOn() {
                 axis.y = Math.sin(theta) * Math.sin(phi);
 
                 //console.log("theta:" + theta +", phi:" + model_info.angle + ", angle:" + fixAngle);
-                //箱オブジェクトの上向きを指定
+                //オブジェクトの上向きを指定
                 model.lookAt(axis);//←----------回転行列とクォータニオンが更新される（２）
                 //上向きベクトルを回転軸としてangle[rad]回転するクォータニオンを生成
                 q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), angle); //←（３）
-                //箱オブジェクトを回転軸周りで回転
+                //オブジェクトを回転軸周りで回転
                 model.quaternion.multiply(q); //←-----------------------------------（４）
 
                 //model.rotation.z = 1.5 //phi:90~180なら1.5
@@ -587,7 +588,7 @@ function processARTryOn() {
                 //phi=180,-180~,theta=90,angle=-0+手首の回転,position_x-=0.0
 
 
-                // 2.指の座標を3D空間座標に変換 0:-0.4,196.5:0.0,392:0.4
+                // 3.手首の座標を3D空間座標に変換 0:-0.4,196.5:0.0,392:0.4
                 // 左右のpositionが−1~1じゃない場合にパラメータ調整必要。現状はpixel3aに最適化
                 //console.log("finger_pos:[", + model_info.x + "," + model_info.y + "]");
                 var finger3Dx = (model_info.x * 2 / window.innerWidth) - 1.0;
@@ -598,24 +599,14 @@ function processARTryOn() {
                 finger3Dy = finger3Dy + fixModelPositionRate_y;
                 //console.log("fix_finger3Dpos:[", + finger3Dx + "," + finger3Dy + "]");
 
-                // 3.指輪を指の検出座標に移動
+                // 4.腕時計を手首の検出座標に移動
                 model.position.set(finger3Dx, finger3Dy, 0.0);
                 //console.log("angle:" + model_info.angle);
                 //console.log("distance:" + model_info.distance);
 
-                // 4.手首の回転軸に応じて指輪の軸を回転
-                var radians = THREE.Math.degToRad(model_info.angle + fixAngle);
-                //console.log("angle:" + radians);
 
-                //var axis = new THREE.Vector3(-1, -1, -1);
-                //var rotWorldMatrix = new THREE.Matrix4();
-                //rotWorldMatrix.makeRotationAxis(axis.normalize(), radians);
-                //rotWorldMatrix.multiply(model.matrix);
-                //model.matrix = rotWorldMatrix;
-                //model.quaternion.setFromAxisAngle(axis, radians);
-
-                // 5.指の回転角度に応じて指輪回転
-                //指輪の認識復帰時に表裏状態設定(指輪正面-180度、後ろ0度、可動範囲-180~180度)
+                // 5.手首の回転角度に応じて腕時計回転
+                //手首の認識復帰時に表裏状態設定(指輪正面-180度、後ろ0度、可動範囲-180~180度)
                 if (model.view == null && Math.abs(model_info.w) >= 0.5 && Math.abs(model_info.w) <= 60) {
                     model.view = 'rear';
                 } else if (model.view == null && Math.abs(model_info.w) >= 120 && Math.abs(model_info.w) <= 180) {
@@ -645,7 +636,7 @@ function processARTryOn() {
 
                 //console.log("model_Ring scale:" + model.scale.x);
 
-                // 6.指輪の位置変更に合わせてオクルージョン用の円柱もサイズ、位置変更
+                // 6.腕時計の位置変更に合わせてオクルージョン用の円柱もサイズ、位置変更
                 //パラメータ：90:0, 180:1.55→155/90 = 1.72
                 //cylinder.scale.set(scaling, scaling, scaling);
                 //cylinder.position.set(finger3Dx, finger3Dy, 0.0);
@@ -656,7 +647,7 @@ function processARTryOn() {
                 model.visible = true;
             } else if (flag == false) {
                 //model.visible = false;
-                //指輪のロスト時、表裏状態を初期化
+                //腕時計のロスト時、表裏状態を初期化
                 model.view = null;
             }
         }

@@ -1,4 +1,5 @@
 <html>
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
@@ -18,15 +19,36 @@
   <script src="https://unpkg.com/@tensorflow/tfjs-backend-cpu@2.1.0/dist/tf-backend-cpu.js"></script>
   <!-- Alternatively you can use the WASM backend: <script src="https://unpkg.com/@tensorflow/tfjs-backend-wasm@2.1.0/dist/tf-backend-wasm.js"></script> -->
   <script src="https://unpkg.com/@tensorflow-models/handpose@0.0.6/dist/handpose.js"></script>
-<style>
+  <style>
     body {
       margin: 0;
       overflow: hidden;
     }
+
+    .btn-flat-simple {
+      position: absolute;
+      left: 0;
+      right: 0;
+      margin: auto;
+      top: 10px;
+      display: block;
+      font-weight: bold;
+      padding: 0.0em 0.0em;
+      text-decoration: none;
+      color: #00BCD4;
+      background: #ECECEC;
+      transition: .4s;
+      z-index: 10;
+    }
   </style>
 </head>
+
 <body>
   <div id="main">
+    <select class="btn-flat-simple" id="arTryOnSelect">
+      <option value="ring" selected>指輪(右手薬指)</option>
+      <option value="handwatch">腕時計(左手)</option>
+    </select>
     <video id="video" style="display: none;"></video>
     <canvas id="canvas" style="display: none;"></canvas>
   </div>
@@ -34,4 +56,5 @@
   <script src="./arTryOn-Hand.js"></script>
   <script async src="./opencv.js" onload="opencvIsReady()" type="text/javascript"></script>
 </body>
+
 </html>

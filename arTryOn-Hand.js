@@ -23,6 +23,9 @@ let fingerLookupIndices = {
     pinky: [0, 17, 18, 19, 20]
 };  // for rendering each finger as a polyline
 
+//AR Try On Select
+let arTryOnSelect = "ring";
+
 function opencvIsReady() {
     console.log('OpenCV.js is ready');
     startCamera();
@@ -337,7 +340,7 @@ function processARTryOn() {
         function (gltf) {
             model_HandWatch = gltf.scene; // THREE.Group
             model_HandWatch.name = "HandWatch"
-            model_HandWatch.visible = true;
+            model_HandWatch.visible = false;
             model_HandWatch.scale.set(0.8, 0.8, 0.8);
             model_HandWatch.position.set(0.0, 0.0, 0.0);
             model_HandWatch.rotation.x = 0.0;
@@ -366,7 +369,7 @@ function processARTryOn() {
     //sceneオブジェクトに追加
     scene.add(watch_cylinder);
 
-    /*
+
     //指輪(loadに時間かかるので初期値null)
     var model_Ring = null;
     loader.load('./obj/ring.glb',
@@ -399,7 +402,7 @@ function processARTryOn() {
     ring_cylinder.position.set(0, 0, 0); //(x,y,z)
     //sceneオブジェクトに追加
     scene.add(ring_cylinder);
-    */
+
 
     //オクルージョン 中指用円柱追加
     var middle_cylinder = new THREE.Mesh(
@@ -408,7 +411,7 @@ function processARTryOn() {
     );
     middle_cylinder.position.set(-0.1, 0, 0); //(x,y,z)
     //sceneオブジェクトに追加
-    //scene.add(middle_cylinder);
+    scene.add(middle_cylinder);
 
     //オクルージョン 小指用円柱追加
     var pinky_cylinder = new THREE.Mesh(
@@ -417,7 +420,7 @@ function processARTryOn() {
     );
     pinky_cylinder.position.set(0.1, 0, 0); //(x,y,z)
     //sceneオブジェクトに追加
-    //scene.add(pinky_cylinder);
+    scene.add(pinky_cylinder);
 
 
     // renderer
@@ -473,33 +476,36 @@ function processARTryOn() {
 
         //calcTextureOffset(texture);
 
-        //AR腕時計試着
-        renderHandWatch(model_HandWatch, watch_cylinder, detectWatchArea, detectWatchArea_flag);
-        if (model_HandWatch != null) {
-            //model_HandWatch.position.set(0.0, 0.0, 0.0);
-            //model_HandWatch.rotation.x = 0.0;
-            //model_HandWatch.rotation.y = -1.5;
-            //model_HandWatch.rotation.z = 0.0;
-        }
+        //試着対象判定
+        arTryOnSelect = document.getElementById("arTryOnSelect").value;
+        switch (arTryOnSelect) {
+            case "handwatch":
+                //AR腕時計試着
+                if (model_Ring != null && model_Ring.visible == true) model_Ring.visible = false;
+                renderHandWatch(model_HandWatch, watch_cylinder, detectWatchArea, detectWatchArea_flag);
+                break;
 
-        //AR指輪試着
-        //renderRing(model_Ring, ring_cylinder, detectRingArea, detectRingArea_flag);
-        //if(model_Ring!=null)model_Ring.position.set(0.0, 0.0, 0.0);
-        //手首の回転に応じて深さ変更。中指と小指のmodel_info.zの大きさに応じて円柱のposition.zを微修正
-        if (detectMiddleFingerArea != null && detectPinkyFingerArea != null) {
-            renderFingerOcclusion(middle_cylinder, detectMiddleFingerArea);
-            renderFingerOcclusion(pinky_cylinder, detectPinkyFingerArea);
-            //console.log("middle_z:", + detectMiddleFingerArea.z);
-            //console.log("pinky_z:", + detectPinkyFingerArea.z);
-            //中指と小指のmodel_info.zの大きさに応じて円柱のposition.zを微修正
-            if (detectMiddleFingerArea.z < detectPinkyFingerArea.z) {
-                middle_cylinder.position.z = 0.02;
-                pinky_cylinder.position.z = -0.02;
-            } else {
-                middle_cylinder.position.z = -0.02;
-                pinky_cylinder.position.z = 0.02;
-            }
+            case "ring":
+                if (model_HandWatch != null && model_HandWatch.visible == true) model_HandWatch.visible = false;
+                //AR指輪試着
+                renderRing(model_Ring, ring_cylinder, detectRingArea, detectRingArea_flag);
+                //手首の回転に応じて深さ変更。中指と小指のmodel_info.zの大きさに応じて円柱のposition.zを微修正
+                if (detectMiddleFingerArea != null && detectPinkyFingerArea != null) {
+                    renderFingerOcclusion(middle_cylinder, detectMiddleFingerArea);
+                    renderFingerOcclusion(pinky_cylinder, detectPinkyFingerArea);
+                    //console.log("middle_z:", + detectMiddleFingerArea.z);
+                    //console.log("pinky_z:", + detectPinkyFingerArea.z);
+                    //中指と小指のmodel_info.zの大きさに応じて円柱のposition.zを微修正
+                    if (detectMiddleFingerArea.z < detectPinkyFingerArea.z) {
+                        middle_cylinder.position.z = 0.02;
+                        pinky_cylinder.position.z = -0.02;
+                    } else {
+                        middle_cylinder.position.z = -0.02;
+                        pinky_cylinder.position.z = 0.02;
+                    }
 
+                }
+                break;
         }
 
         stats.update(); // 毎フレームごとにstats.update()を呼ぶ必要がある。
@@ -539,7 +545,7 @@ function processARTryOn() {
                 // 2.手首の傾きに応じて腕時計の軸回転
                 var alpha = 1;
                 var beta = 1;
-                switch (true){
+                switch (true) {
                     case model_info.angle > 90:
                         alpha = -1;
                         beta = -1;
@@ -561,13 +567,13 @@ function processARTryOn() {
                 //fix_w:1~90で上向き回転、-1~-90で下向き回転
                 console.log("hand_w:" + model_info.w);
                 var fix_w = model_info.w * -1.1;
-                if(model_info.w > 0){
+                if (model_info.w > 0) {
                     //fix_w =  model_info.w - 180;
-                }else{
+                } else {
                     //fix_w = model_info.w;
                 }
                 //正面と裏のチラつき防止
-                if(fix_w > 100 || fix_w < -100)fix_w = 0;
+                if (fix_w > 100 || fix_w < -100) fix_w = 0;
                 console.log("fix_w:" + fix_w);
 
                 //上向きベクトルを生成
@@ -654,7 +660,7 @@ function processARTryOn() {
 
                 model.visible = true;
             } else if (flag == false) {
-                //model.visible = false;
+                model.visible = false;
                 //腕時計のロスト時、表裏状態を初期化
                 model.view = null;
             }

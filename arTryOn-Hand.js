@@ -543,7 +543,7 @@ function processARTryOn() {
                 // 2.手首の傾きに応じて腕時計の軸回転
                 var alpha = 1;
                 var beta = 1;
-                if (model_info > 90) {
+                if (model_info.angle > 90) {
                     alpha = -1;
                     beta = -1;
                 } else if (model_info.angle < 0) {

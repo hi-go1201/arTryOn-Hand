@@ -336,7 +336,7 @@ function processARTryOn() {
 
     //腕時計(loadに時間かかるので初期値null)
     var model_HandWatch = null;
-    loader.load('./obj/Hand_watch.glb',
+    loader.load('./obj/HandWatch_light.glb',
         function (gltf) {
             model_HandWatch = gltf.scene; // THREE.Group
             model_HandWatch.name = "HandWatch"

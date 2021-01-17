@@ -90,9 +90,9 @@ async function processVideo() {
         console.log("video source type: portrait");
     }else{
         console.log("video source type: landscape");
-        var tmp = video.videoWidth;
-        video.videoWidth = video.videoHeight;
-        video.videoHeight = tmp;
+        //var tmp = video.videoWidth;
+        //video.videoWidth = video.videoHeight;
+        //video.videoHeight = tmp;
     }
     
     //videoソース読み込み
@@ -102,8 +102,14 @@ async function processVideo() {
 
     //スマホ用にvideoソースの解像度修正
     let dst = new cv.Mat();
+    //3 中心をクロップして揃える
+    //console.log("adjust_video_size 3:" + window.innerWidth + "," + window.innerHeight);
+    var x1 = parseInt((video.videoWidth / 2) - (window.innerWidth / 2));
+    var y1 = parseInt((video.videoHeight / 2) - (window.innerHeight / 2));
+    let rect = new cv.Rect(x1, y1, window.innerWidth, window.innerHeight);
+    dst = src.roi(rect);
     
-    cv.imshow('canvas', src);
+    cv.imshow('canvas', dst);
     src.delete();
     dst.delete();
     await detectHandPose();

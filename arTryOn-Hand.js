@@ -93,7 +93,8 @@ async function processVideo() {
     var h = video.videoHeight;
     var w = video.videoWidth;
     var scale = Math.pow((window.innerWidth * window.innerHeight) / (w * h), 0.5);
-    cv.resize(src, dst, scale, scale, cv.INTER_AREA);
+    console.log("scale:" + scale);
+    cv.resize(src, dst, 0, scale, scale, cv.INTER_AREA);
     //console.log("adjust_video_size 3:" + window.innerWidth + "," + window.innerHeight);
     //var x1 = parseInt((video.videoWidth / 2) - (window.innerWidth / 2));
     //var y1 = parseInt((video.videoHeight / 2) - (window.innerHeight / 2));

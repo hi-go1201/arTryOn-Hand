@@ -104,12 +104,12 @@ async function processVideo() {
     let dst = new cv.Mat();
     //3 中心をクロップして揃える
     //console.log("adjust_video_size 3:" + window.innerWidth + "," + window.innerHeight);
-    var x1 = parseInt((video.videoWidth / 2) - (window.innerWidth / 2));
-    var y1 = parseInt((video.videoHeight / 2) - (window.innerHeight / 2));
-    let rect = new cv.Rect(x1, y1, window.innerWidth, window.innerHeight);
-    dst = src.roi(rect);
+    //var x1 = parseInt((video.videoWidth / 2) - (window.innerWidth / 2));
+    //var y1 = parseInt((video.videoHeight / 2) - (window.innerHeight / 2));
+    //let rect = new cv.Rect(x1, y1, window.innerWidth, window.innerHeight);
+    //dst = src.roi(rect);
     
-    cv.imshow('canvas', dst);
+    cv.imshow('canvas', src);
     src.delete();
     dst.delete();
     await detectHandPose();

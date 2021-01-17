@@ -81,19 +81,6 @@ function startVideoProcessing() {
 
 async function processVideo() {
     //videoソースが画面解像度より小さい時の事前修正が必要(PC,ipadでありがち)
-    if(window.innerWidth < window.innerHeight){
-        console.log("display type: portrait");
-    }else{
-        console.log("display type: landscape");
-    }
-    if(video.videoWidth < video.videoHeight){
-        console.log("video source type: portrait");
-    }else{
-        console.log("video source type: landscape");
-        //var tmp = video.videoWidth;
-        //video.videoWidth = video.videoHeight;
-        //video.videoHeight = tmp;
-    }
     
     //videoソース読み込み
     let vc = new cv.VideoCapture(video);
@@ -102,14 +89,18 @@ async function processVideo() {
 
     //スマホ用にvideoソースの解像度修正
     let dst = new cv.Mat();
-    //3 中心をクロップして揃える
+    //指定した解像度になるように、アスペクト比を固定して、リサイズする
+    var h = video.videoHeight;
+    var w = video.videoWidth;
+    var scale = Math.pow((window.innerWidth * window.innerHeight) / (w * h), 0.5);
+    cv.resize(src, dst, scale, scale, cv.INTER_AREA);
     //console.log("adjust_video_size 3:" + window.innerWidth + "," + window.innerHeight);
     //var x1 = parseInt((video.videoWidth / 2) - (window.innerWidth / 2));
     //var y1 = parseInt((video.videoHeight / 2) - (window.innerHeight / 2));
     //let rect = new cv.Rect(x1, y1, window.innerWidth, window.innerHeight);
     //dst = src.roi(rect);
     
-    cv.imshow('canvas', src);
+    cv.imshow('canvas', dst);
     src.delete();
     dst.delete();
     await detectHandPose();
@@ -248,7 +239,7 @@ function detectRingPos(finger) {
     var target_x = (x1 + x2) * 0.5;
     var target_y = (y1 + y2) * 0.5;
     var target_z = (z1 + z2) * 0.5;
-    //console.log("target_x:" + target_x + ", target_y:" + target_y + ", target_z:" + target_z + ", target_distance:" + distance + ", target_angle:" + angle);
+    console.log("target_x:" + target_x + ", target_y:" + target_y + ", target_z:" + target_z + ", target_distance:" + distance + ", target_angle:" + angle);
     return { x: target_x, y: target_y, z: target_z, angle: angle, distance: distance };
 }
 

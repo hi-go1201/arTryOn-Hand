@@ -80,6 +80,21 @@ function startVideoProcessing() {
 }
 
 async function processVideo() {
+    //videoソースが画面解像度より小さい時の事前修正が必要(PC,ipadでありがち)
+    if(window.innerWidth < window.innerHeight){
+        console.log("display type: portrait");
+    }else{
+        console.log("display type: landscape");
+    }
+    if(video.videoWidth < video.videoHeight){
+        console.log("video source type: portrait");
+    }else{
+        console.log("video source type: landscape");
+        var tmp = video.videoWidth;
+        video.videoWidth = video.videoHeight;
+        video.videoHeight = tmp;
+    }
+    
     //videoソース読み込み
     let vc = new cv.VideoCapture(video);
     let src = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
@@ -87,8 +102,6 @@ async function processVideo() {
 
     //スマホ用にvideoソースの解像度修正
     let dst = new cv.Mat();
-  
-    //videoソースが画面解像度より小さい時の事前修正が必要(PC,ipadでありがち)
     
     cv.imshow('canvas', src);
     src.delete();

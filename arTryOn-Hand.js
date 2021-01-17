@@ -39,8 +39,8 @@ function startCamera() {
         video: {
             facingMode: "environment",
             zoom: true,
-            //width: { min: 800, ideal: 1280, max: 1920 },
-            //height: { min: 600, ideal: 720, max: 1080 }
+            width: { min: 640, ideal: 1920, max: 1920 },
+            height: { min: 480, ideal: 1080, max: 1080 }
         }
     })
         .then(function (stream) {

@@ -3,6 +3,7 @@ let streaming = false;
 var videoElement = document.createElement("video");
 document.body.append(videoElement);
 videoElement.id = "video";
+videoElement.style.display = "none";
 let video = document.getElementById("video");
 
 // HandPose
@@ -51,7 +52,6 @@ function startCamera() {
             video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
             video.setAttribute("autoplay", true);
             video.setAttribute("muted", true);
-            video.setAttribute("display", "none");
             // camera ズーム付けたいがsafari非対応のため未対応
             const [track] = stream.getVideoTracks();
             const capabilities = track.getCapabilities();

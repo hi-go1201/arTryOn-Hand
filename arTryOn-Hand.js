@@ -1,5 +1,8 @@
 // whether streaming video from the camera.
 let streaming = false;
+var videoElement = document.createElement("video");
+document.body.append(videoElement);
+videoElement.id = "video";
 let video = document.getElementById("video");
 
 // HandPose
@@ -48,6 +51,7 @@ function startCamera() {
             video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
             video.setAttribute("autoplay", true);
             video.setAttribute("muted", true);
+            video.setAttribute("display", "none");
             // camera ズーム付けたいがsafari非対応のため未対応
             const [track] = stream.getVideoTracks();
             const capabilities = track.getCapabilities();
@@ -93,14 +97,9 @@ async function processVideo() {
     var h = video.videoHeight;
     var w = video.videoWidth;
     var scale = Math.pow((window.innerWidth * window.innerHeight) / (w * h), 0.5);
-    console.log("scale:" + scale);
+    //console.log("scale:" + scale);
     let dsize = new cv.Size(window.innerWidth, window.innerHeight);
     cv.resize(src, dst, dsize, scale, scale, cv.INTER_AREA);
-    //console.log("adjust_video_size 3:" + window.innerWidth + "," + window.innerHeight);
-    //var x1 = parseInt((video.videoWidth / 2) - (window.innerWidth / 2));
-    //var y1 = parseInt((video.videoHeight / 2) - (window.innerHeight / 2));
-    //let rect = new cv.Rect(x1, y1, window.innerWidth, window.innerHeight);
-    //dst = src.roi(rect);
     
     cv.imshow('canvas', dst);
     src.delete();
@@ -241,7 +240,7 @@ function detectRingPos(finger) {
     var target_x = (x1 + x2) * 0.5;
     var target_y = (y1 + y2) * 0.5;
     var target_z = (z1 + z2) * 0.5;
-    console.log("target_x:" + target_x + ", target_y:" + target_y + ", target_z:" + target_z + ", target_distance:" + distance + ", target_angle:" + angle);
+    //console.log("target_x:" + target_x + ", target_y:" + target_y + ", target_z:" + target_z + ", target_distance:" + distance + ", target_angle:" + angle);
     return { x: target_x, y: target_y, z: target_z, angle: angle, distance: distance };
 }
 
